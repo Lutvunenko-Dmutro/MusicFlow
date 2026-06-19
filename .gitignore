@@ -1,0 +1,35 @@
+# Python / IDE
+__pycache__/
+*.pyc
+venv/
+env/
+.vscode/
+.idea/
+
+# PyInstaller build files
+build/
+dist/
+*.spec
+
+# Local App Data (Do not push user's personal config/history to Git!)
+config.json
+history.json
+.viz_cache/
+downloads/
+
+# Binaries
+yt-dlp.exe
+ffmpeg.exe
+ffprobe.exe
+
+# Media Files
+*.mp3
+*.mp4
+*.m4a
+*.webm
+*.lrc
+
+# History
+download_history.json
+
+models/
