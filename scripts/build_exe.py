@@ -30,7 +30,7 @@ def build_exe():
         "--icon", "icon.ico",
         "--collect-all", "customtkinter",
         "--collect-all", "static_ffmpeg",
-        "gui_app.py"
+        "main.py"
     ]
     
     # Запускаємо процес
@@ -38,8 +38,9 @@ def build_exe():
     print("\n✅ Збірка успішно завершена! Шукайте програму в папці 'dist'.")
 
 if __name__ == "__main__":
-    # Переконуємось, що ми в правильній директорії
-    os.chdir(os.path.dirname(os.path.abspath(__file__)))
+    # Переконуємось, що ми в корені проекту
+    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    os.chdir(project_root)
     
     clean_old_builds()
     build_exe()

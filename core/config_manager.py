@@ -4,7 +4,7 @@ import os
 CONFIG_FILE = "config.json"
 
 DEFAULT_CONFIG = {
-    "output_folder": os.path.join(os.path.dirname(os.path.abspath(__file__)), "My_Music"),
+    "output_folder": os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "My_Music"),
     "theme": "Dark",
     "quality": "320",
     "embed_lyrics": True,

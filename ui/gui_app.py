@@ -4,15 +4,14 @@ import threading
 import os
 import sys
 import subprocess
-
-from ui_sidebar import SidebarFrame
-from ui_main_area import MainAreaFrame
-from ui_right_column import RightColumnFrame
-from ui_player_bar import PlayerBarFrame
-from ui_library import LibraryFrame
-from ui_settings import SettingsFrame
-from download_controller import DownloadController
-from config_manager import load_config
+from ui.sidebar import  SidebarFrame
+from ui.main_area import  MainAreaFrame
+from ui.right_column import  RightColumnFrame
+from ui.player_bar import  PlayerBarFrame
+from ui.library import  LibraryFrame
+from ui.settings import  SettingsFrame
+from core.download_controller import  DownloadController
+from core.config_manager import  load_config
 ctk.set_default_color_theme("blue")  # Сині акценти
 
 class App(ctk.CTk):
@@ -27,7 +26,7 @@ class App(ctk.CTk):
         self.minsize(900, 600)
         
         # Set App Icon
-        icon_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "icon.ico")
+        icon_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "icon.ico")
         if os.path.exists(icon_path):
             try:
                 self.iconbitmap(icon_path)
@@ -35,7 +34,7 @@ class App(ctk.CTk):
                 pass
         
         self.last_downloaded_file = None
-        self.output_folder = os.path.dirname(os.path.abspath(__file__))
+        self.output_folder = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         
         # Встановлюємо фон вікна з підтримкою світлої/темної теми
         self.configure(fg_color=("#F3F4F6", "#121212"))
@@ -43,9 +42,8 @@ class App(ctk.CTk):
         self.download_controller = DownloadController(self)
         
         self._setup_ui()
-        
-        from playlist_manager import PlaylistManager
-        from preview_manager import PreviewManager
+        from core.playlist_manager import PlaylistManager
+        from core.preview_manager import PreviewManager
         
         self.playlist_manager = PlaylistManager(self.player_bar, self.output_folder)
         self.preview_manager = PreviewManager(self)
@@ -61,7 +59,7 @@ class App(ctk.CTk):
         self.grid_columnconfigure(1, weight=1) # Main content (takes all remaining space)
         self.grid_columnconfigure(2, weight=0, minsize=320) # Right column (FIXED width, no jitter)
 
-        self.output_folder = self.config.get("output_folder", os.path.join(os.path.dirname(os.path.abspath(__file__)), "My_Music"))
+        self.output_folder = self.config.get("output_folder", os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "My_Music"))
         os.makedirs(self.output_folder, exist_ok=True)
         self.sidebar = SidebarFrame(self, self)
         self.sidebar.grid(row=0, column=0, sticky="nsew")
@@ -73,7 +71,7 @@ class App(ctk.CTk):
         self.right_column.grid(row=0, column=2, sticky="nsew", padx=(10, 20), pady=20)
         
         self.library_area = LibraryFrame(self, self)
-        from ui_history import HistoryFrame
+        from ui.history import HistoryFrame
         self.history_area = HistoryFrame(self, self)
         self.settings_area = SettingsFrame(self, self)
         # Not gridded initially
@@ -143,7 +141,7 @@ class App(ctk.CTk):
         self.status_label.configure(text=text)
 
     def show_toast(self, message, toast_type="info"):
-        from ui_components import ToastNotification
+        from ui.components import ToastNotification
         ToastNotification.show(self, message, toast_type)
 
     def on_closing(self):
@@ -246,6 +244,3 @@ class App(ctk.CTk):
 
 
 
-if __name__ == "__main__":
-    app = App()
-    app.mainloop()

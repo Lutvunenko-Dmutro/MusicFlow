@@ -1,5 +1,5 @@
 import pytest
-import youtube_api
+import utils.youtube_api
 
 def test_get_preview_info_success(mocker):
     # Mock yt_dlp

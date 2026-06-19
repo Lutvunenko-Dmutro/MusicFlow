@@ -13,7 +13,7 @@ python -m pip install -r requirements.txt
 python -m pip install pyinstaller customtkinter static_ffmpeg pillow pygame
 
 echo 3. Compiling to EXE...
-python -m PyInstaller --noconfirm --clean --onedir --windowed --icon "icon.ico" --name "YT_Music_Downloader" --add-data "icons;icons" --collect-all customtkinter --collect-all static_ffmpeg gui_app.py
+python -m PyInstaller --noconfirm --clean --onedir --windowed --icon "icon.ico" --name "YT_Music_Downloader" --add-data "icons;icons" --collect-all customtkinter --collect-all static_ffmpeg main.py
 
 echo ==============================================
 echo Done! Your app is in the "dist\YT_Music_Downloader" folder.

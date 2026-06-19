@@ -54,9 +54,8 @@ class RightColumnFrame(ctk.CTkFrame):
     def load_history(self):
         for widget in self.history_scroll.winfo_children():
             widget.destroy()
-
-        from history_manager import get_history_items
-        placeholder_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "icons", "music_placeholder.png")
+        from core.history_manager import get_history_items
+        placeholder_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "icons", "music_placeholder.png")
         items = get_history_items(self.app.output_folder, 50, placeholder_path)
         
         if not items:
@@ -152,7 +151,7 @@ class RightColumnFrame(ctk.CTkFrame):
             
     def _perform_delete(self, path):
         try:
-            from history_manager import delete_history_files
+            from core.history_manager import delete_history_files
             delete_history_files(path)
             self.load_history()
         except Exception as e:

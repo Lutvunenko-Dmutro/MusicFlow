@@ -11,9 +11,8 @@ try:
 except ImportError:
     import imageio_ffmpeg
     ffmpeg_exe = imageio_ffmpeg.get_ffmpeg_exe()
-
-from ytdlp_manager import ensure_ytdlp_exists, update_ytdlp, get_ytdlp_path
-from metadata_utils import embed_metadata, fetch_lrc
+from core.ytdlp_manager import  ensure_ytdlp_exists, update_ytdlp, get_ytdlp_path
+from utils.metadata_utils import  embed_metadata, fetch_lrc
 
 def download_and_process_music(url, output_folder, mode, fetch_lyrics, status_callback, progress_callback, success_callback, error_callback, set_process_cb=None, qual="320", use_sponsorblock=True):
     """
@@ -192,13 +191,13 @@ def download_and_process_music(url, output_folder, mode, fetch_lyrics, status_ca
                         pass
                 
                 # Save to history log
-                from history_manager import add_to_json_history
+                from core.history_manager import add_to_json_history
                 add_to_json_history(raw_title, raw_artist, url, mp3_filepath)
                 
                 success_callback(raw_artist, raw_title, mp3_filepath)
             else:
                 # Для плейліста повертаємо останній скачаний файл (якщо є)
-                from history_manager import add_to_json_history
+                from core.history_manager import add_to_json_history
                 add_to_json_history(raw_title or "Playlist", raw_artist or "Various", url, output_folder)
                 
                 if last_downloaded_mp3 and os.path.exists(last_downloaded_mp3):

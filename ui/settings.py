@@ -3,7 +3,7 @@ import os
 import threading
 import subprocess
 from customtkinter import filedialog
-from config_manager import load_config, save_config
+from core.config_manager import  load_config, save_config
 
 class SettingsFrame(ctk.CTkFrame):
     def __init__(self, master, app, **kwargs):
@@ -182,7 +182,7 @@ class SettingsFrame(ctk.CTkFrame):
 
     def clear_history(self):
         try:
-            from history_manager import clear_history_data
+            from core.history_manager import clear_history_data
             clear_history_data()
             if hasattr(self.app, 'right_column'):
                 self.app.right_column.load_history()

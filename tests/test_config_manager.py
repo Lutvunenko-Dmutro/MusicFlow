@@ -1,7 +1,7 @@
 import os
 import json
 import pytest
-import config_manager
+import core.config_manager
 
 # Fixture to safely replace the global CONFIG_FILE path during tests
 @pytest.fixture

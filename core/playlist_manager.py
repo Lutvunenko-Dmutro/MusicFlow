@@ -1,6 +1,6 @@
 import os
 import random
-from history_manager import get_json_history, get_history_items
+from core.history_manager import  get_json_history, get_history_items
 
 class PlaylistManager:
     """Менеджер для керування відтворенням, чергою, історією та наступною/попередньою піснею"""
@@ -25,7 +25,7 @@ class PlaylistManager:
                 return
 
         # 2. Якщо історії ще немає, беремо найновіший файл із папки
-        placeholder = os.path.join(os.path.dirname(os.path.abspath(__file__)), "icons", "music_placeholder.png")
+        placeholder = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "icons", "music_placeholder.png")
         items = get_history_items(self.output_folder, 1, placeholder)
         if items and os.path.exists(items[0]['path']):
             self.last_downloaded_file = items[0]['path']
@@ -43,7 +43,7 @@ class PlaylistManager:
     def _switch_song(self, direction=1):
         if not self.player_bar.engine.current_song_path: return
         
-        placeholder = os.path.join(os.path.dirname(os.path.abspath(__file__)), "icons", "music_placeholder.png")
+        placeholder = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "icons", "music_placeholder.png")
         items = get_history_items(self.output_folder, 1000, placeholder)
         if not items: return
         

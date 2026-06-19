@@ -8,7 +8,7 @@ class SidebarFrame(ctk.CTkFrame):
         self.app = app
 
         icon_size = (18, 18)
-        icon_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "icons")
+        icon_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "icons")
         
         try:
             self.img_dashboard = ctk.CTkImage(light_image=Image.open(os.path.join(icon_path, "dashboard_active.png")), size=icon_size)

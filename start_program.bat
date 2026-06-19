@@ -16,5 +16,5 @@ if %errorlevel% neq 0 (
 )
 
 echo Starting program...
-python gui_app.py
+python main.py
 pause

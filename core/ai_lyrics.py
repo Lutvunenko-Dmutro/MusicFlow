@@ -2,7 +2,7 @@ import os
 import threading
 import customtkinter as ctk
 
-MODELS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "models")
+MODELS_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "models")
 os.makedirs(MODELS_DIR, exist_ok=True)
 
 MODEL_SIZE = "base"

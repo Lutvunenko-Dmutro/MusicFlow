@@ -10,21 +10,20 @@ from PIL import Image, ImageDraw
 import io
 import os
 import tkinter as tk
-from audio_visualizer import AudioVisualizer
+from ui.audio_visualizer import  AudioVisualizer
 
 class PlayerBarFrame(ctk.CTkFrame):
     def __init__(self, master, app, **kwargs):
         super().__init__(master, fg_color=("#F9FAFB", "#111111"), **kwargs)
         self.app = app
-
-        from playback_engine import PlaybackEngine
+        from core.playback_engine import PlaybackEngine
         self.engine = PlaybackEngine()
 
         self.shuffle_enabled = False
         self.repeat_mode = 0 # 0=off, 1=all, 2=one
 
         # Load premium icons
-        icons_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "icons")
+        icons_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "icons")
         def load_icon(name, size):
             path = os.path.join(icons_dir, name)
             if os.path.exists(path):
@@ -54,7 +53,7 @@ class PlayerBarFrame(ctk.CTkFrame):
 
         # Album art with rounded corners via a canvas trick
         placeholder_path = os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), "icons", "music_placeholder.png"
+            os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "icons", "music_placeholder.png"
         )
         self.default_cover = Image.open(placeholder_path) if os.path.exists(placeholder_path) else None
 
@@ -269,8 +268,7 @@ class PlayerBarFrame(ctk.CTkFrame):
             self.visualizer.start()
 
             self.time_total_lbl.configure(text=self.format_time(self.engine.song_length))
-
-            from metadata_utils import extract_track_metadata, parse_lrc_text
+            from utils.metadata_utils import extract_track_metadata, parse_lrc_text
             
             metadata = extract_track_metadata(path)
             title = metadata.get('title')
@@ -302,7 +300,7 @@ class PlayerBarFrame(ctk.CTkFrame):
 
             # Додаємо або оновлюємо історію прослуховування
             try:
-                from history_manager import add_to_json_history
+                from core.history_manager import add_to_json_history
                 # Оскільки у нас може не бути прямого URL для локального файлу, передаємо порожній рядок
                 add_to_json_history(display_title, display_artist, "", path)
                 
@@ -404,7 +402,7 @@ class PlayerBarFrame(ctk.CTkFrame):
         
         def on_yes():
             dialog.destroy()
-            from ai_lyrics import download_ai_model_ui, transcribe_audio_ui
+            from core.ai_lyrics import download_ai_model_ui, transcribe_audio_ui
             download_ai_model_ui(self.app, on_complete=lambda: transcribe_audio_ui(self.app, self.current_song_path, on_success=self._display_lyrics_window))
             
         btn_yes = ctk.CTkButton(btn_frame, text="Так, завантажити", fg_color="#E52D27", hover_color="#c0241f", command=on_yes)
@@ -414,10 +412,10 @@ class PlayerBarFrame(ctk.CTkFrame):
         btn_no.pack(side="right", expand=True, padx=10)
 
     def _display_lyrics_window(self, lyrics):
-        from ui_lyrics_karaoke import KaraokeLyricsUI
+        from ui.lyrics_karaoke import KaraokeLyricsUI
         
         def on_generate():
-            from ai_lyrics import is_model_installed, transcribe_audio_ui
+            from core.ai_lyrics import is_model_installed, transcribe_audio_ui
             if not is_model_installed():
                 self._ask_install_model()
             else:

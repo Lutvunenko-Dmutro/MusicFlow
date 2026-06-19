@@ -1,7 +1,7 @@
 import os
 import json
 import pytest
-import history_manager
+import core.history_manager
 
 @pytest.fixture
 def mock_history_file(tmp_path, mocker):

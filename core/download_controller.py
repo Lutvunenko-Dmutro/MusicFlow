@@ -139,8 +139,7 @@ class DownloadController:
 
         def set_process_cb(p):
             self.current_download_process = p
-
-        from download_engine import download_and_process_music
+            from core.download_engine import download_and_process_music
         # Передаємо керування в Engine. qual також передається з налаштувань, якщо потрібно.
         qual = self.app.config.get("quality", "320")
         use_sponsorblock = self.app.config.get("use_sponsorblock", True)

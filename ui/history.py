@@ -31,15 +31,14 @@ class HistoryFrame(ctk.CTkFrame):
         self.scroll_frame = ctk.CTkScrollableFrame(self, fg_color="transparent")
         self.scroll_frame.pack(fill="both", expand=True, padx=10, pady=(0, 20))
 
-        self.placeholder_img = ctk.CTkImage(light_image=Image.open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "icons", "music_placeholder.png")), size=(40, 40))
+        self.placeholder_img = ctk.CTkImage(light_image=Image.open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "icons", "music_placeholder.png")), size=(40, 40))
         
         self.load_history()
 
     def load_history(self):
         for widget in self.scroll_frame.winfo_children():
             widget.destroy()
-
-        from history_manager import get_json_history
+        from core.history_manager import get_json_history
         history_data = get_json_history()
 
         if not history_data:
@@ -88,7 +87,7 @@ class HistoryFrame(ctk.CTkFrame):
         self.app.trigger_preview(url)
 
     def delete_file(self, filepath):
-        from history_manager import delete_history_files
+        from core.history_manager import delete_history_files
         try:
             delete_history_files(filepath)
         except Exception:
@@ -96,6 +95,6 @@ class HistoryFrame(ctk.CTkFrame):
         self.load_history()
 
     def clear_history(self):
-        from history_manager import clear_json_history
+        from core.history_manager import clear_json_history
         clear_json_history()
         self.load_history()

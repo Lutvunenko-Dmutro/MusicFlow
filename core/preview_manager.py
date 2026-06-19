@@ -13,9 +13,9 @@ class PreviewManager:
         threading.Thread(target=self.fetch_preview_info, args=(url,), daemon=True).start()
 
     def fetch_preview_info(self, url):
-        from youtube_api import get_preview_info
+        from utils.youtube_api import get_preview_info
         mode = self.app.right_column.mode_dropdown.get()
-        default_icon = os.path.join(os.path.dirname(os.path.abspath(__file__)), "icons", "music_placeholder.png")
+        default_icon = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "icons", "music_placeholder.png")
         
         def on_success(title, artist):
             self.app.after(0, lambda: self.app.main_area.preview_title.configure(text=title[:40]+"..." if len(title)>40 else title))
