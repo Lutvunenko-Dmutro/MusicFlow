@@ -5,6 +5,13 @@ import static_ffmpeg
 from ui.gui_app import App
 from utils.error_handler import setup_global_error_handling
 
+# In windowed mode (EXE), sys.stdout and sys.stderr are None. 
+# static_ffmpeg tries to write to stdout, causing a crash. We mock them here.
+if sys.stdout is None:
+    sys.stdout = open(os.devnull, 'w')
+if sys.stderr is None:
+    sys.stderr = open(os.devnull, 'w')
+
 # Add ffmpeg to PATH automatically
 static_ffmpeg.add_paths()
 
