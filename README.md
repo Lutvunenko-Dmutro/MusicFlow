@@ -1,91 +1,105 @@
-# 🎵 YouTube Music Pro
+*Read this in other languages: [Українська](README.uk.md)*
 
-![Python Version](https://img.shields.io/badge/Python-3.10%2B-blue?style=for-the-badge&logo=python)
+# 🎵 Music Flow
 ![Platform](https://img.shields.io/badge/Platform-Windows-lightgrey?style=for-the-badge&logo=windows)
 ![CustomTkinter](https://img.shields.io/badge/UI-CustomTkinter-blueviolet?style=for-the-badge)
+![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
 
-**YouTube Music Pro** — це сучасний, швидкий та зручний десктопний додаток для пошуку, завантаження та прослуховування музики безпосередньо з YouTube. Створений на Python, він має красивий графічний інтерфейс, вбудований плеєр з аудіовізуалізатором у реальному часі та розумну систему керування бібліотекою.
-
----
-
-## ✨ Головні фічі
-
-- **🚀 Прямі завантаження з YouTube**: Шукай будь-яку пісню або просто вставляй посилання на відео. Додаток автоматично завантажить найкращу якість аудіо за допомогою вбудованого рушія `yt-dlp`.
-- **🎧 Вбудований музичний плеєр**: Тобі не потрібні сторонні програми. Слухай завантажені треки миттєво завдяки аудіо-рушію `pygame`.
-- **🎛️ Аудіовізуалізатор у реальному часі**: Дивись, як твоя музика оживає! Неймовірний неоновий візуалізатор (на базі FFT) реагує на частоти треку, який зараз грає.
-- **🖼️ Розумні метадані та обкладинки**: Програма автоматично отримує мініатюри відео, імена виконавців і назви пісень, та гармонійно вбудовує їх у плеєр.
-- **🎨 Красива система тем**: Повна підтримка **Темної**, **Світлої** та **Системної** тем. Інтерфейс динамічно підлаштовується під твою операційну систему.
-- **📚 Бібліотека та Історія**: Керуй усією завантаженою музикою. Видаляй, відтворюй або переглядай свою локальну бібліотеку в один клік.
-- **⚡ Багатопотоковість**: Інтерфейс ніколи не зависає. Завантаження, обробка аудіо та збір метаданих відбуваються у фоновому режимі (окремих потоках).
+**Music Flow** is a modern, fast, and feature-rich desktop application for downloading and listening to music directly from YouTube and YouTube Music. Built with Python, it features a beautiful graphical user interface, an embedded music player with a real-time audio visualizer, a smart local library manager, and robust multi-language support.
 
 ---
 
-## 📸 Технологічний стек
+## ✨ Key Features
 
-- **[CustomTkinter](https://github.com/TomSchimansky/CustomTkinter)**: Відповідає за сучасний та адаптивний графічний інтерфейс.
-- **[yt-dlp](https://github.com/yt-dlp/yt-dlp)**: Надійне та надшвидке ядро для витягування аудіо з YouTube.
-- **[Pygame](https://www.pygame.org/)**: Забезпечує плавне відтворення звуку з мінімальною затримкою.
-- **[NumPy](https://numpy.org/)**: Швидкі математичні обчислення (Fast Fourier Transform) для візуалізації звуку.
-- **[Pillow](https://python-pillow.org/)**: Обробка зображень для високоякісних обкладинок треків.
-- **[FFmpeg](https://ffmpeg.org/)**: Конвертація аудіо та аналіз спектра (працює "з коробки" завдяки `static_ffmpeg`).
+- **🚀 Direct Downloads (Tracks & Playlists)**: Just paste a link to a YouTube video, track, or a full playlist. The app will automatically detect the type and download the highest quality audio using the embedded `yt-dlp` engine.
+- **🎧 Built-in Music Player**: No need for third-party media players. Listen to your downloaded tracks instantly within the app, powered by `pygame`.
+- **🎛️ Real-Time Audio Visualizer**: Watch your music come to life! An incredible, buttery-smooth visualizer reacts to the frequencies (FFT) of the currently playing track.
+- **🖼️ Smart Metadata & Covers**: The app automatically fetches video thumbnails, artist names, track titles, and embeds them into the MP3 metadata (ID3 tags) along with lyrics.
+- **🚫 SponsorBlock Integration**: Automatically skips or removes non-music segments (intros, outros, sponsorships) from downloaded tracks to keep your music pure.
+- **🎨 Beautiful Theme System**: Full support for **Dark**, **Light**, and **System** themes. The UI dynamically adapts to your OS preferences.
+- **🌍 Multi-language Support**: Interface is fully localized in **English** and **Ukrainian**, easily extensible via JSON files.
+- **📚 SQLite Library & History**: Manage all your downloaded music efficiently. Play, delete, or browse your local library in one click with a fast SQLite backend.
+- **⚡ Multi-threading**: The UI never freezes. Downloading, audio processing, and metadata gathering all happen flawlessly in the background.
 
 ---
 
-## 🚀 Як запустити
+## 📸 Tech Stack
 
-### 🛠️ Спосіб 1: Запуск з коду (Для розробників)
-Якщо ти хочеш запустити програму через Python або змінити код:
+- **[CustomTkinter](https://github.com/TomSchimansky/CustomTkinter)**: Powers the modern and responsive GUI.
+- **[yt-dlp](https://github.com/yt-dlp/yt-dlp)**: Reliable, lightning-fast core for extracting audio from YouTube.
+- **[Pygame](https://www.pygame.org/)**: Ensures smooth audio playback with minimal latency.
+- **[NumPy](https://numpy.org/)**: Performs fast mathematical computations (Fast Fourier Transform) for the audio visualizer.
+- **[Pillow](https://python-pillow.org/)**: Image processing for high-quality track covers and UI icons.
+- **[FFmpeg](https://ffmpeg.org/)**: Audio conversion, metadata embedding, and spectrum analysis.
+- **SQLite**: Local database for instant loading of your music library and history.
 
-1. **Клонуй репозиторій:**
+---
+
+## 🚀 Getting Started
+
+### 📥 Method 1: Pre-built Executable (.exe) - Easiest!
+You don't need Python or any coding knowledge.
+1. Go to the **[Releases](../../releases)** page on the right sidebar.
+2. Download the latest `MusicFlow.exe`.
+3. Double-click and enjoy!
+
+### 🛠️ Method 2: Run from Source (For Developers)
+
+If you want to run the app directly from Python or modify the code:
+
+1. **Clone the repository:**
    ```bash
-   git clone https://github.com/ТВІЙ_ЮЗЕРНЕЙМ/YouTubeMusicPro.git
-   cd YouTubeMusicPro
+   git clone https://github.com/YOUR_USERNAME/MusicFlow.git
+   cd MusicFlow
    ```
 
-2. **Встанови залежності:**
-   Переконайся, що в тебе встановлений Python 3.10 або новіший.
+2. **Install dependencies:**
+   Make sure you have Python 3.10+ installed.
    ```bash
    pip install -r requirements.txt
    ```
 
-3. **Запусти додаток:**
+3. **Run the application:**
    ```bash
-   python gui_app.py
+   python main.py
    ```
 
-### 📦 Спосіб 2: Збірка готового файлу (.exe)
-Хочеш поділитися додатком з друзями, у яких взагалі не встановлений Python? Ти можеш зібрати повністю портативний Windows `.exe` файл!
+### 📦 Method 3: Build a Standalone Executable Yourself
 
-Просто клікни двічі по цьому бат-файлу:
+Want to share the app with friends who don't have Python installed? You can build a fully portable Windows `.exe` file!
+
+Just double-click this batch script:
 ```bash
 build_exe.bat
 ```
-*(Цей скрипт автоматично очистить старий кеш, встановить/оновить залежності та збере додаток за допомогою PyInstaller).*
+*(This script will automatically clear the old cache, install dependencies into a virtual environment, and package the app using PyInstaller).*
 
-Після завершення збірки, готова до використання програма буде знаходитись у папці `dist/YT_Music_Downloader/`!
+Once the build is complete, your ready-to-use application will be located in the `dist/Music_Flow/` folder!
 
 ---
 
-## 📂 Структура проєкту
+## 📂 Project Structure
 
 ```text
-📦 YouTubeMusicPro
- ┣ 📂 icons/                   # Картинки та іконки інтерфейсу
- ┣ 📜 gui_app.py               # Головний файл запуску програми
- ┣ 📜 ui_player_bar.py         # Нижня панель плеєра (кнопки, прогрес, гучність)
- ┣ 📜 audio_visualizer.py      # Логіка FFT візуалізатора звуку
- ┣ 📜 download_engine.py       # Ядро завантаження через yt-dlp
- ┣ 📜 history_manager.py       # Збереження бібліотеки у JSON-форматі
- ┣ 📜 requirements.txt         # Список бібліотек Python
- ┣ 📜 build_exe.bat            # Скрипт для автоматичної збірки .exe файлу
+📦 MusicFlow
+ ┣ 📂 core/                    # Core logic (download engine, player, history, API clients)
+ ┣ 📂 ui/                      # Graphical interface components (CustomTkinter widgets)
+ ┣ 📂 utils/                   # Helper functions (API parsing, regex)
+ ┣ 📂 locales/                 # Translation JSON files (en, uk)
+ ┣ 📂 icons/                   # App icons and UI assets
+ ┣ 📜 main.py                  # Main entry point of the application
+ ┣ 📜 build_exe.bat            # Script for automated .exe compilation
+ ┣ 📜 requirements.txt         # Python dependencies
  ┗ 📜 ...
 ```
 
 ---
 
-## 🤝 Як долучитися
-Відгуки, пропозиції та ідеї щодо нових фіч завжди вітаються! 
-Якщо знаєш, як зробити додаток ще кращим — роби форк та надсилай Pull Request.
+## 🤝 Contributing
 
-## 📝 Ліцензія
-Цей проєкт створений виключно для навчальних та особистих цілей. Музика, завантажена за допомогою цього інструменту, повинна використовуватися відповідно до Умов використання YouTube та місцевих законів про авторське право.
+Feedback, suggestions, and ideas for new features are always welcome!
+If you know how to make the app even better — feel free to fork the repository and submit a Pull Request.
+
+## 📝 License
+
+This project is created exclusively for educational and personal purposes. Music downloaded using this tool should be used in accordance with YouTube's Terms of Service and your local copyright laws. Distributed under the MIT License.

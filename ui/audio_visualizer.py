@@ -37,9 +37,23 @@ class AudioVisualizer(tk.Canvas):
         self.loading_pb = ctk.CTkProgressBar(self, width=150, height=4, mode="indeterminate",
                                              progress_color="#E52D27", fg_color=("#E5E7EB", "#2a2a2a"))
 
-        self.bind("<Configure>", lambda e: self._build_bars())
+        self._resize_job = None
+        self._is_resizing = False
+        self.bind("<Configure>", self._on_resize)
         self.after(100, self._build_bars)
         self._theme_loop()
+
+    def _on_resize(self, event):
+        if event.widget != self:
+            return
+        self._is_resizing = True
+        if self._resize_job is not None:
+            self.after_cancel(self._resize_job)
+        self._resize_job = self.after(150, self._finish_resize)
+
+    def _finish_resize(self):
+        self._is_resizing = False
+        self._build_bars()
 
     def _theme_loop(self):
         expected_bg = self._get_theme_bg(self.bg_color)
@@ -142,6 +156,8 @@ class AudioVisualizer(tk.Canvas):
                     save_to_cache(cache_file, frames)
                     print(f"[Visualizer] 💾 Cached: {__import__('os').path.basename(filepath)}")
             except Exception as exc:
+                import logging
+                logging.error(f"[Visualizer FFT error] {exc}", exc_info=True)
                 print(f"[Visualizer FFT error] {exc}")
             self.after(0, self._hide_loading)
 
@@ -161,7 +177,8 @@ class AudioVisualizer(tk.Canvas):
         self._settle()
 
     def _tick(self):
-        if not self._is_playing:
+        if not self._is_playing or self._is_resizing:
+            self.after(int(1000 / self._fps), self._tick)
             return
         try:
             import pygame

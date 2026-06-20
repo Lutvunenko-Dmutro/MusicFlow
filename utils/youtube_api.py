@@ -5,13 +5,13 @@ from PIL import Image
 import yt_dlp
 import customtkinter as ctk
 
-def get_preview_info(url, mode, success_callback, error_callback, image_callback, default_icon_path):
+def get_preview_info(url, is_playlist, success_callback, error_callback, image_callback, default_icon_path):
     """
     Отримує інформацію про відео/плейліст та завантажує обкладинку.
     """
     try:
         ydl_opts = {'quiet': True, 'no_warnings': True, 'extract_flat': 'in_playlist'}
-        if mode == "Single Track":
+        if not is_playlist:
             ydl_opts['noplaylist'] = True
         else:
             ydl_opts['noplaylist'] = False

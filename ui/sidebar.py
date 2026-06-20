@@ -24,24 +24,26 @@ class SidebarFrame(ctk.CTkFrame):
         except Exception:
             self.img_dashboard = self.img_library = self.img_history = self.img_play = self.img_settings = self.img_logo = None
 
-        self.grid_rowconfigure(5, weight=1) # Spacer
+        self.grid_rowconfigure(6, weight=1) # Spacer
 
-        self.logo_label = ctk.CTkLabel(self, image=self.img_logo, text=" YT Music", font=ctk.CTkFont(family="Segoe UI", size=22, weight="bold"), text_color=("#111827", "#ffffff"), compound="left")
-        self.logo_label.grid(row=0, column=0, padx=24, pady=(30, 35), sticky="w")
+        self.logo_label = ctk.CTkLabel(self, image=self.img_logo, text=" Music Flow", font=ctk.CTkFont(family="Segoe UI", size=22, weight="bold"), text_color=("#111827", "#ffffff"), compound="left")
+        self.logo_label.grid(row=0, column=0, padx=24, pady=(30, 2), sticky="w")
+        
+        self.version_badge = ctk.CTkLabel(self, text="Beta 1", font=ctk.CTkFont(family="Segoe UI", size=10, weight="bold"), fg_color=("#E5E7EB", "#2A2A2A"), text_color=("#6B7280", "#9CA3AF"), corner_radius=4)
+        self.version_badge.grid(row=1, column=0, padx=65, pady=(0, 25), sticky="w", ipadx=6, ipady=1)
 
         # Навігаційні кнопки з більшим corner_radius та приємнішими кольорами
         btn_font = ctk.CTkFont(family="Segoe UI", size=15, weight="bold")
         
-        self.btn_dashboard = ctk.CTkButton(self, image=self.img_dashboard, text="  Dashboard", fg_color=("#E5E7EB", "#1A1A1A"), text_color="#E52D27", hover_color=("#D1D5DB", "#2A2A2A"), anchor="w", font=btn_font, width=170, height=45, corner_radius=10, command=self.app.show_dashboard)
-        self.btn_dashboard.grid(row=1, column=0, padx=20, pady=5)
+        from core.i18n import _
+        self.btn_dashboard = ctk.CTkButton(self, image=self.img_dashboard, text=_("dashboard", "Dashboard"), fg_color=("#E5E7EB", "#1A1A1A"), text_color="#E52D27", hover_color=("#D1D5DB", "#2A2A2A"), anchor="w", font=btn_font, width=170, height=45, corner_radius=10, command=self.app.show_dashboard)
+        self.btn_dashboard.grid(row=2, column=0, padx=20, pady=5)
 
-        self.btn_library = ctk.CTkButton(self, image=self.img_library, text="  Library", fg_color="transparent", text_color=("#374151", "#d1d5db"), hover_color=("#E5E7EB", "#2A2A2A"), anchor="w", font=ctk.CTkFont(family="Segoe UI", size=15), width=170, height=45, corner_radius=10, command=self.app.show_library)
-        self.btn_library.grid(row=2, column=0, padx=20, pady=5)
+        self.btn_library = ctk.CTkButton(self, image=self.img_library, text=_("library", "Library"), fg_color="transparent", text_color=("#374151", "#d1d5db"), hover_color=("#E5E7EB", "#2A2A2A"), anchor="w", font=ctk.CTkFont(family="Segoe UI", size=15), width=170, height=45, corner_radius=10, command=self.app.show_library)
+        self.btn_library.grid(row=3, column=0, padx=20, pady=5)
 
-        self.btn_history = ctk.CTkButton(self, image=self.img_history, text="  History", fg_color="transparent", text_color=("#374151", "#d1d5db"), hover_color=("#E5E7EB", "#2A2A2A"), anchor="w", font=ctk.CTkFont(family="Segoe UI", size=15), width=170, height=45, corner_radius=10, command=self.app.show_history)
-        self.btn_history.grid(row=3, column=0, padx=20, pady=5)
+        self.btn_history = ctk.CTkButton(self, image=self.img_history, text=_("history", "History"), fg_color="transparent", text_color=("#374151", "#d1d5db"), hover_color=("#E5E7EB", "#2A2A2A"), anchor="w", font=ctk.CTkFont(family="Segoe UI", size=15), width=170, height=45, corner_radius=10, command=self.app.show_history)
+        self.btn_history.grid(row=4, column=0, padx=20, pady=5)
 
-
-
-        self.btn_settings = ctk.CTkButton(self, image=self.img_settings, text="  Settings", fg_color="transparent", text_color=("#6B7280", "#9ca3af"), hover_color=("#E5E7EB", "#2A2A2A"), anchor="w", font=ctk.CTkFont(family="Segoe UI", size=15), width=170, height=45, corner_radius=10, command=self.app.show_settings)
-        self.btn_settings.grid(row=6, column=0, padx=20, pady=(0, 25))
+        self.btn_settings = ctk.CTkButton(self, image=self.img_settings, text=_("settings", "Settings"), fg_color="transparent", text_color=("#6B7280", "#9ca3af"), hover_color=("#E5E7EB", "#2A2A2A"), anchor="w", font=ctk.CTkFont(family="Segoe UI", size=15), width=170, height=45, corner_radius=10, command=self.app.show_settings)
+        self.btn_settings.grid(row=7, column=0, padx=20, pady=(0, 25))

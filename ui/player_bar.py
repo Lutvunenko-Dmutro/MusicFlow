@@ -75,6 +75,7 @@ class PlayerBarFrame(ctk.CTkFrame):
             if not self.visualizer_frame.winfo_ismapped():
                 self.visualizer_frame.pack(side="left", padx=(18, 0))
 
+
     # ── Helpers ──────────────────────────────────────────────────────────────
     def format_time(self, seconds):
         m = int(seconds // 60)

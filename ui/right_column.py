@@ -1,5 +1,6 @@
 import customtkinter as ctk
 import os
+from core.i18n import _
 
 class RightColumnFrame(ctk.CTkFrame):
     def __init__(self, master, app, **kwargs):
@@ -10,24 +11,16 @@ class RightColumnFrame(ctk.CTkFrame):
         self.options_card = ctk.CTkFrame(self, fg_color=("#FFFFFF", "#1A1A1A"), corner_radius=18, border_width=1, border_color=("#E5E7EB", "#2A2A2A"))
         self.options_card.pack(fill="x", pady=(0, 20))
 
-        self.options_title = ctk.CTkLabel(self.options_card, text="Download Options", font=ctk.CTkFont(family="Segoe UI", size=16, weight="bold"), text_color=("#111827", "#ffffff"))
+        self.options_title = ctk.CTkLabel(self.options_card, text=_("right_options", "Download Options"), font=ctk.CTkFont(family="Segoe UI", size=16, weight="bold"), text_color=("#111827", "#ffffff"))
         self.options_title.pack(anchor="w", padx=20, pady=(20, 15))
 
-        self.mode_frame = ctk.CTkFrame(self.options_card, fg_color="transparent")
-        self.mode_frame.pack(fill="x", padx=15, pady=(0, 15))
-        ctk.CTkLabel(self.mode_frame, text="Mode:", font=ctk.CTkFont(size=13), text_color=("#6B7280", "#9ca3af"), width=80, anchor="w").pack(side="left")
-        self.mode_dropdown = ctk.CTkOptionMenu(self.mode_frame, values=["Single Track", "Full Playlist"], fg_color=("#F9FAFB", "#121212"), button_color=("#E5E7EB", "#333333"), button_hover_color=("#D1D5DB", "#4b5563"), text_color=("#111827", "#ffffff"))
-        self.mode_dropdown.pack(side="left", fill="x", expand=True)
 
-        self.format_frame = ctk.CTkFrame(self.options_card, fg_color="transparent")
-        self.format_frame.pack(fill="x", padx=15, pady=(0, 15))
-        ctk.CTkLabel(self.format_frame, text="Format:", font=ctk.CTkFont(size=13), text_color=("#6B7280", "#9ca3af"), width=80, anchor="w").pack(side="left")
-        self.format_dropdown = ctk.CTkOptionMenu(self.format_frame, values=["MP3"], fg_color=("#F9FAFB", "#121212"), button_color=("#E5E7EB", "#333333"), button_hover_color=("#D1D5DB", "#4b5563"), text_color=("#111827", "#ffffff"))
-        self.format_dropdown.pack(side="right", fill="x", expand=True)
+
+
 
         self.lyrics_frame = ctk.CTkFrame(self.options_card, fg_color="transparent")
         self.lyrics_frame.pack(fill="x", padx=15, pady=(0, 15))
-        ctk.CTkLabel(self.lyrics_frame, text="Lyrics:", font=ctk.CTkFont(size=13), text_color=("#6B7280", "#9ca3af"), width=80, anchor="w").pack(side="left")
+        ctk.CTkLabel(self.lyrics_frame, text=_("right_lyrics", "Embed Lyrics:"), font=ctk.CTkFont(size=13), text_color=("#6B7280", "#9ca3af"), width=80, anchor="w").pack(side="left")
         
         self.lyrics_switch = ctk.CTkSwitch(self.lyrics_frame, text="", progress_color="#E52D27", width=50)
         self.lyrics_switch.select()
@@ -37,7 +30,7 @@ class RightColumnFrame(ctk.CTkFrame):
         self.history_card = ctk.CTkFrame(self, fg_color=("#FFFFFF", "#1A1A1A"), corner_radius=18, border_width=1, border_color=("#E5E7EB", "#2A2A2A"))
         self.history_card.pack(fill="both", expand=True)
 
-        self.history_title = ctk.CTkLabel(self.history_card, text="Queue / History", font=ctk.CTkFont(family="Segoe UI", size=16, weight="bold"), text_color=("#111827", "#ffffff"))
+        self.history_title = ctk.CTkLabel(self.history_card, text=_("history_title", "Queue / History"), font=ctk.CTkFont(family="Segoe UI", size=16, weight="bold"), text_color=("#111827", "#ffffff"))
         self.history_title.pack(anchor="w", padx=20, pady=(20, 10))
 
         self.history_scroll = ctk.CTkScrollableFrame(self.history_card, fg_color="transparent")
@@ -65,10 +58,11 @@ class RightColumnFrame(ctk.CTkFrame):
             icon_lbl = ctk.CTkLabel(empty_frame, text="🎵", font=ctk.CTkFont(size=42), text_color=("#D1D5DB", "#333333"))
             icon_lbl.pack(pady=(0, 10))
             
-            title_lbl = ctk.CTkLabel(empty_frame, text="No downloads yet", font=ctk.CTkFont(family="Segoe UI", size=15, weight="bold"), text_color=("#6B7280", "#9ca3af"))
+            from core.i18n import _
+            title_lbl = ctk.CTkLabel(empty_frame, text=_("empty_history", "No downloads yet"), font=ctk.CTkFont(family="Segoe UI", size=15, weight="bold"), text_color=("#6B7280", "#9ca3af"))
             title_lbl.pack(pady=(0, 5))
             
-            hint_lbl = ctk.CTkLabel(empty_frame, text="Paste a YouTube link and\nclick Download to start", font=ctk.CTkFont(family="Segoe UI", size=13), text_color=("#9CA3AF", "#6b7280"))
+            hint_lbl = ctk.CTkLabel(empty_frame, text=_("empty_history_hint", "Paste a YouTube link and\nclick Download to start"), font=ctk.CTkFont(family="Segoe UI", size=13), text_color=("#9CA3AF", "#6b7280"))
             hint_lbl.pack()
             return
             
@@ -121,9 +115,10 @@ class RightColumnFrame(ctk.CTkFrame):
             del_btn.grid(row=0, column=3, padx=(2, 8))
 
     def confirm_delete(self, path, filename):
+        from core.i18n import _
         # Create a simple confirmation dialog
         dialog = ctk.CTkToplevel(self.app)
-        dialog.title("Confirm Deletion")
+        dialog.title(_("confirm_delete_title", "Confirm Deletion"))
         dialog.geometry("400x150")
         dialog.resizable(False, False)
         dialog.transient(self.app)
@@ -135,20 +130,20 @@ class RightColumnFrame(ctk.CTkFrame):
         y = self.app.winfo_y() + (self.app.winfo_height() - 150) // 2
         dialog.geometry(f"+{x}+{y}")
         
-        lbl = ctk.CTkLabel(dialog, text=f"Are you sure you want to delete:\n{filename}?", font=ctk.CTkFont(size=14))
+        lbl = ctk.CTkLabel(dialog, text=_("confirm_delete_desc", "Are you sure you want to delete:\n{filename}?").replace("{filename}", filename), font=ctk.CTkFont(size=14))
         lbl.pack(pady=20)
         
         btn_frame = ctk.CTkFrame(dialog, fg_color="transparent")
         btn_frame.pack(fill="x", padx=20, pady=20)
         
-        cancel_btn = ctk.CTkButton(btn_frame, text="Cancel", fg_color=("#D1D5DB", "#333333"), hover_color=("#9CA3AF", "#4b5563"), text_color=("#111827", "#ffffff"), command=dialog.destroy)
+        cancel_btn = ctk.CTkButton(btn_frame, text=_("cancel", "Cancel"), fg_color=("#D1D5DB", "#333333"), hover_color=("#9CA3AF", "#4b5563"), text_color=("#111827", "#ffffff"), command=dialog.destroy)
         cancel_btn.pack(side="left", expand=True, padx=5)
         
         def on_confirm():
             dialog.destroy()
             self.delete_music(path)
             
-        confirm_btn = ctk.CTkButton(btn_frame, text="Delete", fg_color="#E52D27", hover_color="#B31217", command=on_confirm)
+        confirm_btn = ctk.CTkButton(btn_frame, text=_("delete", "Delete"), fg_color="#E52D27", hover_color="#B31217", command=on_confirm)
         confirm_btn.pack(side="right", expand=True, padx=20)
 
     def delete_music(self, path):

@@ -47,15 +47,15 @@ def parse_progress_line(line):
 def handle_status_line(line, status_callback):
     """Виводить статус на основі спеціальних ключових рядків yt-dlp."""
     if "[ExtractAudio]" in line:
-        status_callback("🎵 Конвертація у MP3...")
+        status_callback("Конвертація у MP3...")
     elif "[SponsorBlock]" in line and "Fetching" in line:
-        status_callback("✂️ Завантаження сегментів реклами...")
+        status_callback("Завантаження сегментів реклами...")
     elif "[ModifyChapters]" in line:
-        status_callback("✂️ Видалення реклами...")
+        status_callback("Видалення реклами...")
     elif "[Metadata]" in line:
-        status_callback("🏷️ Збереження обкладинки та тегів...")
+        status_callback("Збереження обкладинки та тегів...")
     elif "[download] Downloading video" in line:
-        status_callback("⬇️ Завантаження відео...")
+        status_callback("Завантаження відео...")
 
 
 def postprocess_single(mp3_filepath, jpg_filepath, raw_title, raw_artist,
@@ -66,13 +66,13 @@ def postprocess_single(mp3_filepath, jpg_filepath, raw_title, raw_artist,
 
     lyrics_text = None
     if fetch_lyrics:
-        status_callback("🔍 Пошук тексту пісні (LRC)...")
+        status_callback("Пошук тексту пісні (LRC)...")
         progress_callback(None, {'indeterminate': True, 'percent_str': 'Search LRC'})
         filename_base = os.path.splitext(mp3_filepath)[0]
         lyrics_text = fetch_lrc(raw_title, raw_artist, filename_base)
 
     progress_callback(0.95, {'percent_str': 'Embedding'})
-    status_callback("💿 Вшивання обкладинки та метаданих...")
+    status_callback("Вшивання обкладинки та метаданих...")
     embed_metadata(mp3_filepath, jpg_filepath, raw_title, raw_artist, lyrics_text)
 
     if os.path.exists(jpg_filepath):

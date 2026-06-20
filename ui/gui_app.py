@@ -12,10 +12,18 @@ ctk.set_default_color_theme("blue")
 class App(ctk.CTk):
     def __init__(self):
         super().__init__()
+        from utils.error_handler import set_app_instance
+        set_app_instance(self)
+
         self.config = load_config()
+
+        # Initialize I18n before any UI is built
+        from core.i18n import I18nManager
+        I18nManager.get_instance(self.config)
+
         ctk.set_appearance_mode(self.config.get("theme", "Dark"))
 
-        self.title("YT Music Downloader")
+        self.title("Music Flow")
         self.geometry("1150x680")
         self.minsize(900, 600)
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
@@ -25,6 +33,11 @@ class App(ctk.CTk):
         if os.path.exists(icon_path):
             try:
                 self.iconbitmap(icon_path)
+                # Fix for Windows Taskbar icon
+                if os.name == 'nt':
+                    import ctypes
+                    myappid = 'dimamu.ytmusicdownloader.1.0'
+                    ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
             except Exception:
                 pass
 
@@ -114,7 +127,6 @@ class App(ctk.CTk):
         self.main_area.preview_card.pack_forget()
         self.main_area.progress_card.pack_forget()
         self.main_area.welcome_frame.pack(fill="both", expand=True, pady=40)
-        self.main_area.btn_finish.configure(state="disabled")
         self.main_area.btn_cancel.configure(state="disabled")
         self.progressbar.set(0)
         for lbl, txt in [
@@ -145,7 +157,9 @@ class App(ctk.CTk):
         sys.exit(0)
 
     def on_url_typing(self, event):
-        if event.keysym in ('Control_L', 'Control_R', 'Shift_L', 'Shift_R', 'Alt_L', 'Alt_R'):
+        if self.url_entry.cget("state") == "disabled":
+            return
+        if event.keysym in ('Control_L', 'Control_R', 'Shift_L', 'Shift_R', 'Alt_L', 'Alt_R', 'Super_L', 'Super_R', 'Print'):
             return
         url = self.url_entry.get().strip()
         if not url:

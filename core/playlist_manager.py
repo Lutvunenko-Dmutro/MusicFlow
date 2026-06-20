@@ -32,7 +32,8 @@ class PlaylistManager:
             self.player_bar.play_specific_music(self.last_downloaded_file)
         else:
             if hasattr(self.player_bar.app, 'update_status'):
-                self.player_bar.app.update_status("⚠️ Спочатку завантажте пісню, щоб її прослухати!")
+                from core.i18n import _
+                self.player_bar.app.update_status(_("lib_empty_play", "⚠️ Download a song first to play it!"))
 
     def play_next(self):
         self._switch_song(direction=1)

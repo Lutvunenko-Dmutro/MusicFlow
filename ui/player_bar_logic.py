@@ -90,9 +90,13 @@ def toggle_play(bar):
     if bar.engine.is_playing:
         bar.engine.pause()
         bar.btn_play_pause.configure(image=bar.icon_play)
+        if hasattr(bar, 'visualizer'):
+            bar.visualizer.stop()
     else:
         bar.engine.play()
         bar.btn_play_pause.configure(image=bar.icon_pause)
+        if hasattr(bar, 'visualizer'):
+            bar.visualizer.start()
 
 
 def stop_music(bar):
@@ -104,6 +108,7 @@ def stop_music(bar):
     bar.time_current_lbl.configure(text="0:00")
     if hasattr(bar, 'visualizer'):
         bar.visualizer.stop()
+
 
 
 def seek(bar, value):

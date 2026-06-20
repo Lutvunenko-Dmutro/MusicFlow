@@ -16,6 +16,12 @@ config.json
 history.json
 .viz_cache/
 downloads/
+My_Music/
+build_env/
+
+# Logs and Auth
+*.log
+oauth.json
 
 # Binaries
 yt-dlp.exe

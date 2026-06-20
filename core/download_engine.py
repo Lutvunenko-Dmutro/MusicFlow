@@ -7,15 +7,18 @@ try:
     import static_ffmpeg
     static_ffmpeg.add_paths()
     ffmpeg_exe = "ffmpeg"
-except ImportError:
-    import imageio_ffmpeg
-    ffmpeg_exe = imageio_ffmpeg.get_ffmpeg_exe()
+except Exception:
+    try:
+        import imageio_ffmpeg
+        ffmpeg_exe = imageio_ffmpeg.get_ffmpeg_exe()
+    except Exception:
+        ffmpeg_exe = "ffmpeg"
 
 from core.ytdlp_manager import ensure_ytdlp_exists, update_ytdlp, get_ytdlp_path
 from core.download_helpers import parse_progress_line, handle_status_line, postprocess_single, postprocess_playlist
+from core.config_manager import load_config
 
-
-def download_and_process_music(url, output_folder, mode, fetch_lyrics,
+def download_and_process_music(url, output_folder, is_playlist, fetch_lyrics,
                                 status_callback, progress_callback,
                                 success_callback, error_callback,
                                 set_process_cb=None, qual="320", use_sponsorblock=True):
@@ -29,14 +32,13 @@ def download_and_process_music(url, output_folder, mode, fetch_lyrics,
             update_ytdlp(status_callback, force=force_update)
             ytdlp_exe = get_ytdlp_path()
 
-            is_playlist = (mode == "Full Playlist")
             raw_title, raw_artist = "Playlist", "YouTube"
             filename_base = None
             last_downloaded_mp3 = None
             creationflags = subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0
 
             if not is_playlist:
-                status_callback("🔍 Отримання інформації про відео...")
+                status_callback("Отримання інформації про відео...")
                 info_cmd = [
                     ytdlp_exe, "--dump-json", "--windows-filenames",
                     "-o", os.path.join(output_folder, "%(title)s.%(ext)s"),
@@ -107,7 +109,7 @@ def download_and_process_music(url, output_folder, mode, fetch_lyrics,
         try:
             _attempt_download(force_update=False)
         except Exception:
-            status_callback("⚠️ Спроба авто-лікування (оновлення yt-dlp)...")
+            status_callback("Спроба авто-лікування (оновлення yt-dlp)...")
             _attempt_download(force_update=True)
 
     except Exception as e:
@@ -125,7 +127,7 @@ def _build_download_cmd(ytdlp_exe, output_folder, qual, use_sponsorblock, is_pla
         "--format", "bestaudio/best",
         "--extract-audio", "--audio-format", "mp3",
         "--audio-quality", qual,
-        "--embed-metadata", "--write-thumbnail",
+        "--embed-metadata", "--embed-thumbnail", "--write-thumbnail",
         "--convert-thumbnails", "jpg",
         "--windows-filenames", "--no-warnings", "--newline",
         "-o", os.path.join(output_folder, "%(title)s.%(ext)s"),

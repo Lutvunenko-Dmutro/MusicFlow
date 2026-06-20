@@ -1,22 +1,22 @@
 @echo off
 echo ==============================================
-echo Building YT Music Downloader (EXE Compilation)
+echo Building Music Flow (Fast VENV Method)
 echo ==============================================
 
-echo 1. Cleaning old build files...
-if exist "build" rmdir /s /q "build"
-if exist "dist" rmdir /s /q "dist"
-del /s /q *.spec 2>nul
+set SKIP_INSTALL=
+if not exist "build_env\Scripts\activate.bat" (
+    echo [1/3] Creating virtual environment - first time only, please wait...
+    rmdir /S /Q build_env 2>nul
+    python -m venv build_env
+) else (
+    echo [1/3] Using existing virtual environment - Fast mode...
+    set SKIP_INSTALL=--skip-install
+)
 
-echo 2. Installing requirements...
-python -m pip install -r requirements.txt
-python -m pip install pyinstaller customtkinter static_ffmpeg pillow pygame
+echo [2/3] Compiling safely inside the clean environment...
+call build_env\Scripts\activate.bat
+python scripts\build_with_progress.py %SKIP_INSTALL%
 
-echo 3. Compiling to EXE...
-python -m PyInstaller --noconfirm --clean --onedir --windowed --icon "icon.ico" --name "YT_Music_Downloader" --add-data "icons;icons" --collect-all customtkinter --collect-all static_ffmpeg main.py
-
-echo ==============================================
-echo Done! Your app is in the "dist\YT_Music_Downloader" folder.
-echo You can create a shortcut to YT_Music_Downloader.exe to your Desktop!
-echo ==============================================
+echo [3/3] Done!
+call deactivate
 pause

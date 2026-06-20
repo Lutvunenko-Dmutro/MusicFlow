@@ -6,7 +6,6 @@ import customtkinter as ctk
 from PIL import Image
 from ui.audio_visualizer import AudioVisualizer
 
-
 def load_icon(icons_dir, name, size):
     path = os.path.join(icons_dir, name)
     if os.path.exists(path):
@@ -74,8 +73,9 @@ def _build_left_panel(bar, icons_dir):
     bar.text_frame = ctk.CTkFrame(bar.info_frame, fg_color="transparent")
     bar.text_frame.pack(side="left")
 
+    from core.i18n import _
     bar.title_lbl = ctk.CTkLabel(
-        bar.text_frame, text="No track selected",
+        bar.text_frame, text=_("no_track", "No track selected"),
         font=ctk.CTkFont(family="Segoe UI", size=15, weight="bold"),
         text_color=("#111827", "#f1f5f9"), anchor="w", width=160
     )

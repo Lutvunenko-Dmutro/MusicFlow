@@ -50,7 +50,7 @@ def setup_ui(app):
     app.download_btn = app.main_area.download_btn
     app.progressbar  = app.main_area.progressbar
     app.status_label = app.main_area.status_label
-    app.eta_label    = app.main_area.eta_label
+
     app.speed_label  = app.main_area.speed_label
 
     # Right-click context menu
@@ -73,4 +73,4 @@ def setup_bindings(app):
     )
     app.url_entry.bind("<Control-KeyPress>", app.handle_ctrl_v)
     app.url_entry.bind("<Button-3>", app.show_context_menu)
-    app.main_area.btn_finish.configure(command=app.reset_ui)
+    app.main_area.btn_cancel.configure(command=app.download_controller.cancel_download)

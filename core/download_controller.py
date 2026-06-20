@@ -10,12 +10,13 @@ class DownloadController:
     def start_download_thread(self):
         url = self.app.url_entry.get().strip()
         # Отримуємо налаштування з правого меню та глобальних налаштувань
-        mode = self.app.right_column.mode_dropdown.get()
+        from core.i18n import _
+        is_playlist = "list=" in url
         qual = self.app.config.get("quality", "320")
         embed_lrc = self.app.right_column.lyrics_switch.get()
 
         if not url:
-            self.app.update_status("Введіть посилання!")
+            self.app.update_status(_("status_enter_url", "Enter a URL!"))
             return
 
         # Setup progress preview
@@ -36,22 +37,24 @@ class DownloadController:
         
         # Show progress bar and reset status
         self.app.progressbar.set(0)
+        self.app.main_area.progress_percent_label.configure(text="0%")
         self.app.main_area.size_label.configure(text="-")
-        self.app.main_area.eta_label.configure(text="-")
-        self.app.update_status("✨ Status: Starting...")
+        from core.i18n import _
+        self.app.update_status(_("status_starting", "Status: Starting..."))
 
         # Setup Cancel button
         self.is_download_cancelled = False
         self.app.main_area.btn_cancel.configure(state="normal", text_color="#ef4444", command=self.cancel_download)
 
         # Run download in a separate thread so GUI doesn't freeze
-        thread = threading.Thread(target=self.download_music, args=(url, self.app.output_folder, mode, embed_lrc), daemon=True)
+        thread = threading.Thread(target=self.download_music, args=(url, self.app.output_folder, is_playlist, embed_lrc), daemon=True)
         thread.start()
 
     def cancel_download(self):
         self.is_download_cancelled = True
         self.app.main_area.btn_cancel.configure(state="disabled")
-        self.app.update_status("Cancelling...")
+        from core.i18n import _
+        self.app.update_status(_("status_cancelling", "Cancelling..."))
         
         if self.current_download_process:
             import subprocess
@@ -63,14 +66,31 @@ class DownloadController:
             except Exception:
                 pass
 
+        def cleanup_garbage():
+            import time, glob, os
+            time.sleep(1) # wait for process to fully die
+            try:
+                folder = self.app.output_folder
+                for ext in ('*.part', '*.ytdl', '*.temp', '*.f251', '*.f140', '*.webm'):
+                    for f in glob.glob(os.path.join(folder, ext)):
+                        try:
+                            # Only delete if it's very recent (created/modified in the last 5 minutes)
+                            if time.time() - os.path.getmtime(f) < 300:
+                                os.remove(f)
+                        except:
+                            pass
+            except:
+                pass
+                
+        threading.Thread(target=cleanup_garbage, daemon=True).start()
+
     def download_success(self, artist, title, filepath):
-        self.app.update_status(f"Completed: {title}")
-        self.app.show_toast(f"Download Complete: {title[:20]}...", "success")
+        from core.i18n import _
+        self.app.update_status(_("status_completed", "Completed: {title}").replace("{title}", title))
+        self.app.show_toast(_("status_completed", "Completed: {title}").replace("{title}", title[:20] + "..."), "success")
         self.update_progress(1.0)
-        self.app.main_area.btn_finish.configure(state="normal", text_color="#121212")
         self.app.main_area.btn_cancel.configure(state="disabled")
         
-        self.app.main_area.eta_label.configure(text="-")
         self.app.main_area.speed_label.configure(text="-")
         self.app.main_area.size_label.configure(text="-")
         
@@ -103,22 +123,16 @@ class DownloadController:
                 
             if percent is not None:
                 self.app.main_area.progressbar.set(percent)
+                self.app.main_area.progress_percent_label.configure(text=f"{int(percent * 100)}%")
                 
             if details:
-                
                 speed = details.get('speed', '')
-                eta = details.get('eta', '')
                 size = details.get('size', '')
                 
                 if size: self.app.main_area.size_label.configure(text=size)
                 if speed: self.app.main_area.speed_label.configure(text=speed)
-                if eta:
-                    if eta == "00:00":
-                        self.app.main_area.eta_label.configure(text="00:00")
-                    else:
-                        self.app.main_area.eta_label.configure(text=eta)
 
-    def download_music(self, url, output_folder, mode, fetch_lyrics):
+    def download_music(self, url, output_folder, is_playlist, embed_lrc):
         
         # Колбеки для оновлення GUI з фонового потоку
         def status_cb(msg):
@@ -132,10 +146,11 @@ class DownloadController:
             self.app.after(0, lambda a=artist, t=title, f=filepath: self.download_success(a, t, f))
 
         def error_cb(err_msg):
+            from core.i18n import _
             safe_msg = str(err_msg).replace("'\n", " ").replace("\n", " | ")
-            self.app.after(0, lambda m=safe_msg: self.app.update_status(f"❌ Error: {m}"))
-            self.app.after(0, lambda m=safe_msg: self.app.show_toast(f"Download Error", "error"))
-            self.app.after(0, lambda m=safe_msg: self.app.main_area.prog_track_title.configure(text="ПОМИЛКА!", text_color="#E52D27"))
+            self.app.after(0, lambda m=safe_msg: self.app.update_status(_("status_error", "❌ Error: {msg}").replace("{msg}", m)))
+            self.app.after(0, lambda m=safe_msg: self.app.show_toast(_("status_error_toast", "Download Error"), "error"))
+            self.app.after(0, lambda m=safe_msg: self.app.main_area.prog_track_title.configure(text=_("status_error_title", "ERROR!"), text_color="#E52D27"))
             self.app.after(0, lambda m=safe_msg: self.app.main_area.prog_track_artist.configure(text=m[:60] + "..." if len(m) > 60 else m))
             self.app.after(0, lambda: self.app.main_area.progressbar.stop() if self.app.main_area.progressbar.cget("mode") == "indeterminate" else None)
             self.app.after(0, lambda: self.app.main_area.progressbar.configure(mode="determinate"))
@@ -153,4 +168,4 @@ class DownloadController:
         # Передаємо керування в Engine. qual також передається з налаштувань, якщо потрібно.
         qual = self.app.config.get("quality", "320")
         use_sponsorblock = self.app.config.get("use_sponsorblock", True)
-        download_and_process_music(url, output_folder, mode, fetch_lyrics, status_cb, progress_cb, success_cb, error_cb, set_process_cb, qual, use_sponsorblock)
+        download_and_process_music(url, output_folder, is_playlist, embed_lrc, status_cb, progress_cb, success_cb, error_cb, set_process_cb, qual, use_sponsorblock)

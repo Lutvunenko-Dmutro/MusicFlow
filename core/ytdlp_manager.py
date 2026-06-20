@@ -35,7 +35,7 @@ def update_ytdlp(status_callback=None, force=False):
                     pass
 
         if status_callback:
-            status_callback("🔄 Перевірка оновлень yt-dlp.exe...")
+            status_callback("Перевірка оновлень yt-dlp.exe...")
         try:
             creationflags = 0
             if os.name == 'nt':
