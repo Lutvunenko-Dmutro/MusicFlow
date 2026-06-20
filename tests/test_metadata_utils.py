@@ -1,5 +1,5 @@
 import pytest
-import utils.metadata_utils
+from utils import metadata_utils
 
 def test_clean_text_basic():
     assert metadata_utils.clean_text("Song Name") == "Song Name"

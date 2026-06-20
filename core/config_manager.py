@@ -1,7 +1,8 @@
 import json
 import os
 
-CONFIG_FILE = "config.json"
+_BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+CONFIG_FILE = os.path.join(_BASE_DIR, "config.json")
 
 DEFAULT_CONFIG = {
     "output_folder": os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "My_Music"),

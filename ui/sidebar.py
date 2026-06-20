@@ -4,6 +4,10 @@ import os
 
 class SidebarFrame(ctk.CTkFrame):
     def __init__(self, master, app, **kwargs):
+        kwargs.setdefault("fg_color", ("#FFFFFF", "#1A1A1A"))
+        kwargs.setdefault("corner_radius", 18)
+        kwargs.setdefault("border_width", 1)
+        kwargs.setdefault("border_color", ("#E5E7EB", "#2A2A2A"))
         super().__init__(master, **kwargs)
         self.app = app
 

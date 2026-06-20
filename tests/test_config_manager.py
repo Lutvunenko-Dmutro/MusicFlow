@@ -1,13 +1,13 @@
 import os
 import json
 import pytest
-import core.config_manager
+from core import config_manager
 
 # Fixture to safely replace the global CONFIG_FILE path during tests
 @pytest.fixture
 def mock_config_file(tmp_path, mocker):
     test_config_path = tmp_path / "test_config.json"
-    mocker.patch('config_manager.CONFIG_FILE', str(test_config_path))
+    mocker.patch('core.config_manager.CONFIG_FILE', str(test_config_path))
     return test_config_path
 
 def test_load_config_no_file(mock_config_file):

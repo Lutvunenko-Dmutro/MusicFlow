@@ -50,14 +50,20 @@ def load_and_play(bar, path):
             bar.cover_lbl.configure(image=photo, text="")
 
         filename = os.path.basename(path)
-        display_title  = title  if title  else (filename[:28] + "…" if len(filename) > 28 else filename)
+        display_title = title if title else filename
+        if len(display_title) > 30:
+            display_title = display_title[:29] + "…"
+            
         display_artist = artist if artist else "Playing from library"
+        if len(display_artist) > 35:
+            display_artist = display_artist[:34] + "…"
+            
         bar.title_lbl.configure(text=display_title)
         bar.artist_lbl.configure(text=display_artist)
 
         try:
             from core.history_manager import add_to_json_history
-            add_to_json_history(display_title, display_artist, "", path)
+            add_to_json_history(title if title else filename, artist if artist else "Playing from library", "", path)
             if hasattr(bar.app, 'history_area') and bar.app.history_area.winfo_manager():
                 bar.app.history_area.load_history()
         except Exception as e:

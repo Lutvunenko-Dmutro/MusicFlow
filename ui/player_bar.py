@@ -66,7 +66,7 @@ class PlayerBarFrame(ctk.CTkFrame):
                 self.mini_lyrics_lbl.pack_forget()
         else:
             if not self.mini_lyrics_lbl.winfo_ismapped():
-                self.mini_lyrics_lbl.pack(side="left", padx=(0, 20), before=self.btn_lyrics)
+                self.mini_lyrics_lbl.pack(side="right")
 
         if width < 700:
             if self.visualizer_frame.winfo_ismapped():
@@ -87,45 +87,40 @@ class PlayerBarFrame(ctk.CTkFrame):
         for item in self.current_lyrics_lines:
             if actual_pos >= item[0]:
                 current_line = item[1]
-        if not current_line:
-            return ""
-        max_chars = 40
-        if window_width < 1100: max_chars = 30
-        if window_width < 1000: max_chars = 20
-        if window_width < 950:  max_chars = 12
-        return current_line[:max_chars] + "..." if len(current_line) > max_chars else current_line
+        return current_line
 
     # ── Progress loop ────────────────────────────────────────────────────────
     def update_progress_loop(self):
         if self.engine.is_playing:
-            actual_pos = self.engine.get_actual_pos()
-            if self.engine.song_length > 0:
-                percent = (actual_pos / self.engine.song_length) * 100
-                if percent <= 100:
-                    if not self.is_seeking:
-                        self.progress_slider.set(percent)
-                    self.time_current_lbl.configure(text=self.format_time(actual_pos))
+            import pygame
+            # Check if music has naturally finished playing
+            if not pygame.mixer.music.get_busy():
+                if self.repeat_mode == 2:
+                    self.seek(0)
+                else:
+                    self.stop_music()
+                    self.progress_slider.set(100)
+                    if hasattr(self.app, 'play_next_song'):
+                        self.app.after(500, self.app.play_next_song)
+            else:
+                actual_pos = self.engine.get_actual_pos()
+                if self.engine.song_length > 0:
+                    percent = (actual_pos / self.engine.song_length) * 100
+                    if percent <= 100:
+                        if not self.is_seeking:
+                            self.progress_slider.set(percent)
+                        self.time_current_lbl.configure(text=self.format_time(actual_pos))
 
-                    # Sync karaoke window
-                    if (hasattr(self, 'lyrics_ui') and
-                            getattr(self.lyrics_ui, 'dialog', None) and
-                            self.lyrics_ui.dialog.winfo_exists()):
-                        self.lyrics_ui.sync_lyrics(actual_pos)
+                        # Sync karaoke window
+                        if (hasattr(self, 'lyrics_ui') and
+                                getattr(self.lyrics_ui, 'dialog', None) and
+                                self.lyrics_ui.dialog.winfo_exists()):
+                            self.lyrics_ui.sync_lyrics(actual_pos)
 
-                    # Mini lyrics bar
-                    if hasattr(self, 'mini_lyrics_lbl'):
-                        line = self._get_lyrics_line(actual_pos, self.winfo_width()) \
-                            if self.current_lyrics_lines else ""
-                        self.mini_lyrics_lbl.configure(text=line)
-
-                    # End of track
-                    if percent >= 99.8:
-                        if self.repeat_mode == 2:
-                            self.seek(0)
-                        else:
-                            self.stop_music()
-                            self.progress_slider.set(100)
-                            if hasattr(self.app, 'play_next_song'):
-                                self.app.after(500, self.app.play_next_song)
+                        # Mini lyrics bar
+                        if hasattr(self, 'mini_lyrics_lbl'):
+                            line = self._get_lyrics_line(actual_pos, self.winfo_width()) \
+                                if self.current_lyrics_lines else ""
+                            self.mini_lyrics_lbl.configure(text=line)
 
         self.after(500, self.update_progress_loop)

@@ -10,7 +10,8 @@ except ImportError:
 
 import sqlite3
 
-DB_FILE = "download_history.db"
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DB_FILE = os.path.join(BASE_DIR, "download_history.db")
 
 def _init_db():
     conn = sqlite3.connect(DB_FILE)

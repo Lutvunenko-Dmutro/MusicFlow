@@ -30,6 +30,12 @@ class AudioVisualizer(tk.Canvas):
         self._audio_frames = []
         self._fps   = 60
         self._is_playing = False
+        self._is_loading = False
+
+        # ProgressBar for loading state
+        import customtkinter as ctk
+        self.loading_pb = ctk.CTkProgressBar(self, width=150, height=4, mode="indeterminate",
+                                             progress_color="#E52D27", fg_color=("#E5E7EB", "#2a2a2a"))
 
         self.bind("<Configure>", lambda e: self._build_bars())
         self.after(100, self._build_bars)
@@ -97,6 +103,23 @@ class AudioVisualizer(tk.Canvas):
         self._dot_y[:] = self.FLOOR
         self._dot_v[:] = 0.0
 
+    def _show_loading(self):
+        self._is_loading = True
+        for line, dot in zip(self._lines, self._dots):
+            self.itemconfig(line, state="hidden")
+            self.itemconfig(dot, state="hidden")
+        self.loading_pb.place(relx=0.5, rely=0.5, anchor="center")
+        self.loading_pb.start()
+
+    def _hide_loading(self):
+        self._is_loading = False
+        self.loading_pb.stop()
+        self.loading_pb.place_forget()
+        if self._is_playing:
+            for line, dot in zip(self._lines, self._dots):
+                self.itemconfig(line, state="normal")
+                self.itemconfig(dot, state="normal")
+
     def load_song(self, filepath):
         """Завантажує кешовані або обраховує фрейми FFT у фоновому потоці."""
         self._audio_frames = []
@@ -107,8 +130,10 @@ class AudioVisualizer(tk.Canvas):
             if frames is not None:
                 self._audio_frames = frames
                 print(f"[Visualizer] ⚡ Cache hit: {__import__('os').path.basename(filepath)}")
+                self.after(0, self._hide_loading)
                 return
 
+            self.after(0, self._show_loading)
             print(f"[Visualizer] 🔍 Analysing: {__import__('os').path.basename(filepath)}")
             try:
                 frames = analyze_audio(filepath, self.bars, self._fps)
@@ -118,15 +143,17 @@ class AudioVisualizer(tk.Canvas):
                     print(f"[Visualizer] 💾 Cached: {__import__('os').path.basename(filepath)}")
             except Exception as exc:
                 print(f"[Visualizer FFT error] {exc}")
+            self.after(0, self._hide_loading)
 
         threading.Thread(target=_worker, daemon=True).start()
 
     def start(self):
         if not self._is_playing:
             self._is_playing = True
-            for line, dot in zip(self._lines, self._dots):
-                self.itemconfig(line, state="normal")
-                self.itemconfig(dot, state="normal")
+            if not self._is_loading:
+                for line, dot in zip(self._lines, self._dots):
+                    self.itemconfig(line, state="normal")
+                    self.itemconfig(dot, state="normal")
             self._tick()
 
     def stop(self):

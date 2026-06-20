@@ -18,8 +18,8 @@ GRAVITY     = 0.35
 
 def get_cache_path(filepath, bars):
     """Унікальний шлях кешу для пісні + поточних налаштувань."""
-    music_dir = os.path.dirname(os.path.abspath(filepath))
-    cache_dir = os.path.join(music_dir, ".viz_cache")
+    app_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    cache_dir = os.path.join(app_dir, ".viz_cache")
     os.makedirs(cache_dir, exist_ok=True)
     file_size = os.path.getsize(filepath) if os.path.exists(filepath) else 0
     raw_key = f"{filepath}|{file_size}|LIBROSA_SMART_STEMS_V1|{bars}"

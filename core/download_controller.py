@@ -11,7 +11,6 @@ class DownloadController:
         url = self.app.url_entry.get().strip()
         # Отримуємо налаштування з правого меню та глобальних налаштувань
         mode = self.app.right_column.mode_dropdown.get()
-        fmt = "mp3" # Формат завжди mp3 в цьому UI
         qual = self.app.config.get("quality", "320")
         embed_lrc = self.app.right_column.lyrics_switch.get()
 
@@ -22,7 +21,7 @@ class DownloadController:
         # Setup progress preview
         self.app.main_area.welcome_frame.pack_forget()
         self.app.main_area.preview_card.pack_forget()
-        self.app.main_area.progress_card.pack(fill="x")
+        self.app.main_area.progress_card.pack(fill="x", pady=(0, 20), padx=25)
         
         thumb = self.app.main_area.thumbnail_label.cget("image")
         if thumb:
@@ -46,7 +45,7 @@ class DownloadController:
         self.app.main_area.btn_cancel.configure(state="normal", text_color="#ef4444", command=self.cancel_download)
 
         # Run download in a separate thread so GUI doesn't freeze
-        thread = threading.Thread(target=self.download_music, args=(url, self.app.output_folder, mode, embed_lrc))
+        thread = threading.Thread(target=self.download_music, args=(url, self.app.output_folder, mode, embed_lrc), daemon=True)
         thread.start()
 
     def cancel_download(self):

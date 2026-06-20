@@ -157,11 +157,19 @@ def _build_center_panel(bar):
 
 
 def _build_right_panel(bar):
-    bar.volume_frame = ctk.CTkFrame(bar, fg_color="transparent")
-    bar.volume_frame.grid(row=1, column=2, sticky="e", padx=(10, 24), pady=12)
+    bar.right_frame = ctk.CTkFrame(bar, fg_color="transparent")
+    bar.right_frame.grid(row=1, column=2, sticky="e", padx=(10, 24), pady=12)
+
+    bar.mini_lyrics_lbl = ctk.CTkLabel(
+        bar.right_frame, text=" ",
+        font=ctk.CTkFont(size=14, weight="bold"),
+        text_color="#FCA5A5", width=250, anchor="e",
+        wraplength=250, justify="right"
+    )
+    bar.mini_lyrics_lbl.pack(side="left", padx=(0, 20))
 
     bar.btn_lyrics = ctk.CTkButton(
-        bar.volume_frame, text="💬", width=30, height=30,
+        bar.right_frame, text="💬", width=30, height=30,
         fg_color="transparent", hover_color=("#E5E7EB", "#1e1e1e"),
         font=ctk.CTkFont(size=16), text_color=("#6B7280", "#6b7280"),
         command=bar.show_lyrics
@@ -169,13 +177,13 @@ def _build_right_panel(bar):
     bar.btn_lyrics.pack(side="left", padx=(0, 10))
 
     bar.vol_icon_lbl = ctk.CTkLabel(
-        bar.volume_frame, text="🔉",
-        font=ctk.CTkFont(size=14), text_color=("#6B7280", "#6b7280")
+        bar.right_frame, text="🔉",
+        font=ctk.CTkFont(size=16), text_color=("#6B7280", "#6b7280")
     )
-    bar.vol_icon_lbl.pack(side="left", padx=5)
+    bar.vol_icon_lbl.pack(side="left", padx=(0, 5))
 
     bar.volume_slider = ctk.CTkSlider(
-        bar.volume_frame, from_=0, to=1, width=100, height=12,
+        bar.right_frame, from_=0, to=1, width=100, height=14,
         button_color=("#6B7280", "#9ca3af"), button_hover_color=("#374151", "#f3f4f6"),
         fg_color=("#D1D5DB", "#2a2a2a"), progress_color="#E52D27",
         command=bar.set_volume
@@ -184,9 +192,4 @@ def _build_right_panel(bar):
     bar.volume_slider.pack(side="left")
     bar.engine.set_volume(0.5)
 
-    bar.mini_lyrics_lbl = ctk.CTkLabel(
-        bar.volume_frame, text=" ",
-        font=ctk.CTkFont(size=14, weight="bold"),
-        text_color="#FCA5A5", width=180, anchor="e"
-    )
-    bar.mini_lyrics_lbl.pack(side="left", padx=(0, 20), before=bar.btn_lyrics)
+

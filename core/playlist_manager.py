@@ -56,7 +56,12 @@ class PlaylistManager:
                 
         if current_idx != -1:
             if self.player_bar.shuffle_enabled:
-                next_idx = random.randint(0, len(items) - 1)
+                if len(items) > 1:
+                    next_idx = current_idx
+                    while next_idx == current_idx:
+                        next_idx = random.randint(0, len(items) - 1)
+                else:
+                    next_idx = 0
             else:
                 next_idx = current_idx + direction
                 if next_idx >= len(items) or next_idx < 0:

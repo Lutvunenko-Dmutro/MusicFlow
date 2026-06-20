@@ -29,7 +29,7 @@ def setup_ui(app):
     os.makedirs(app.output_folder, exist_ok=True)
 
     app.sidebar = SidebarFrame(app, app)
-    app.sidebar.grid(row=0, column=0, sticky="nsew")
+    app.sidebar.grid(row=0, column=0, sticky="nsew", padx=(20, 10), pady=20)
 
     app.main_area = MainAreaFrame(app, app)
     app.main_area.grid(row=0, column=1, sticky="nsew", padx=(10, 20), pady=20)

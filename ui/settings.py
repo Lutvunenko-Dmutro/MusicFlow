@@ -117,15 +117,16 @@ class SettingsFrame(ctk.CTkFrame):
         row4 = ctk.CTkFrame(card, fg_color="transparent")
         row4.pack(fill="x", padx=25, pady=(15, 20))
 
-        cache_size = self.get_cache_size()
-        self.cache_lbl = ctk.CTkLabel(row4, text=f"Visualizer Cache\n(Currently {cache_size:.1f} MB)", justify="left", font=ctk.CTkFont(family="Segoe UI", size=15), text_color=("#374151", "#d1d5db"))
+        self.cache_lbl = ctk.CTkLabel(row4, text="Visualizer Cache\n(Currently 0.0 MB)", justify="left", font=ctk.CTkFont(family="Segoe UI", size=15), text_color=("#374151", "#d1d5db"))
         self.cache_lbl.pack(side="left")
+        self.update_cache_label()
 
         self.btn_clear_cache = ctk.CTkButton(row4, text="Clear Cache", width=120, height=35, corner_radius=8, fg_color=("#D1D5DB", "#374151"), hover_color=("#FCA5A5", "#ef4444"), text_color=("#111827", "#ffffff"), command=self.clear_viz_cache)
         self.btn_clear_cache.pack(side="right")
 
     def get_cache_size(self):
-        cache_dir = ".viz_cache"
+        app_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        cache_dir = os.path.join(app_dir, ".viz_cache")
         if not os.path.exists(cache_dir):
             return 0
         total = 0
@@ -138,8 +139,15 @@ class SettingsFrame(ctk.CTkFrame):
             pass
         return total / (1024 * 1024)
 
+    def update_cache_label(self):
+        cache_size = self.get_cache_size()
+        display_size = 0.1 if 0 < cache_size < 0.05 else cache_size
+        if hasattr(self, 'cache_lbl'):
+            self.cache_lbl.configure(text=f"Visualizer Cache\n(Currently {display_size:.1f} MB)")
+
     def clear_viz_cache(self):
-        cache_dir = ".viz_cache"
+        app_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        cache_dir = os.path.join(app_dir, ".viz_cache")
         if os.path.exists(cache_dir):
             try:
                 for f in os.listdir(cache_dir):
@@ -148,7 +156,7 @@ class SettingsFrame(ctk.CTkFrame):
                         os.remove(fp)
             except Exception:
                 pass
-        self.cache_lbl.configure(text=f"Visualizer Cache\n(Currently 0.0 MB)")
+        self.update_cache_label()
 
     def toggle_sponsorblock(self):
         self.config["use_sponsorblock"] = bool(self.sponsor_switch.get())

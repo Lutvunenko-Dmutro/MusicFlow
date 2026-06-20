@@ -1,12 +1,12 @@
 import os
 import json
 import pytest
-import core.history_manager
+from core import history_manager
 
 @pytest.fixture
 def mock_history_file(tmp_path, mocker):
-    test_hist_path = tmp_path / "test_history.json"
-    mocker.patch('history_manager.HISTORY_JSON_FILE', str(test_hist_path))
+    test_hist_path = tmp_path / "test_history.db"
+    mocker.patch('core.history_manager.DB_FILE', str(test_hist_path))
     return test_hist_path
 
 def test_get_json_history_empty(mock_history_file):
@@ -26,13 +26,12 @@ def test_clear_json_history(mock_history_file):
     assert os.path.exists(mock_history_file)
     
     history_manager.clear_json_history()
-    assert not os.path.exists(mock_history_file)
     assert history_manager.get_json_history() == []
 
 def test_history_limit(mock_history_file):
     # Add 205 items
     for i in range(205):
-        history_manager.add_to_json_history(f"Song {i}", "Artist", "url", "path")
+        history_manager.add_to_json_history(f"Song {i}", "Artist", "url", f"path_{i}")
     
     history = history_manager.get_json_history()
     # Should be limited to 200

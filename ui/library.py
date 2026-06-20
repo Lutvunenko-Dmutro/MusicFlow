@@ -96,7 +96,7 @@ class LibraryFrame(ctk.CTkFrame):
         try:
             current_path = self.app.player_bar.current_song_path
             if current_path and os.path.normcase(os.path.abspath(current_path)) == os.path.normcase(os.path.abspath(path)):
-                self.app.player_bar.stop()
+                self.app.player_bar.stop_music()
                 try:
                     import pygame
                     pygame.mixer.music.unload()

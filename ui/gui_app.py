@@ -70,6 +70,8 @@ class App(ctk.CTk):
 
     def show_settings(self):
         self.hide_all_areas()
+        if hasattr(self, 'settings_area') and hasattr(self.settings_area, 'update_cache_label'):
+            self.settings_area.update_cache_label()
         self.settings_area.grid(row=0, column=1, columnspan=2, sticky="nsew", padx=20, pady=20)
         self.reset_sidebar_buttons()
         self.sidebar.btn_settings.configure(text_color="#E52D27", fg_color=("#E5E7EB", "#1A1A1A"))

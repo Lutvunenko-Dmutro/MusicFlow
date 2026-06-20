@@ -84,7 +84,7 @@ class HistoryFrame(ctk.CTkFrame):
         self.app.show_dashboard()
         self.app.url_entry.delete(0, 'end')
         self.app.url_entry.insert(0, url)
-        self.app.trigger_preview(url)
+        self.app.preview_manager.trigger_preview(url)
 
     def delete_file(self, filepath):
         from core.history_manager import delete_history_files

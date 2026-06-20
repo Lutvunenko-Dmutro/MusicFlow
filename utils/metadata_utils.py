@@ -25,9 +25,9 @@ def embed_metadata(mp3_path, jpg_path, title, artist, lyrics):
             pass
             
         # 1. Прописуємо текстові метадані (щоб телефон правильно сортував музику)
-        audio.tags.add(TIT2(encoding=3, text=title))       # Назва пісні
-        audio.tags.add(TPE1(encoding=3, text=artist))      # Артист
-        audio.tags.add(TALB(encoding=3, text=title))       # Альбом 
+        audio.tags.add(TIT2(encoding=3, text=title))        # Назва пісні
+        audio.tags.add(TPE1(encoding=3, text=artist))       # Артист
+        audio.tags.add(TALB(encoding=3, text=artist))       # Альбом (Singles = Artist)
         
         # 2. Вшиваємо текст, якщо він є
         if lyrics:

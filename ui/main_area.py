@@ -3,12 +3,16 @@ from PIL import Image
 
 class MainAreaFrame(ctk.CTkFrame):
     def __init__(self, master, app, **kwargs):
+        kwargs.setdefault("fg_color", ("#FFFFFF", "#1A1A1A"))
+        kwargs.setdefault("corner_radius", 18)
+        kwargs.setdefault("border_width", 1)
+        kwargs.setdefault("border_color", ("#E5E7EB", "#2A2A2A"))
         super().__init__(master, **kwargs)
         self.app = app
 
         # ====== INPUT CARD ======
-        self.input_card = ctk.CTkFrame(self, fg_color=("#FFFFFF", "#1A1A1A"), corner_radius=18, border_width=1, border_color=("#E5E7EB", "#2A2A2A"))
-        self.input_card.pack(fill="x", pady=(0, 15))
+        self.input_card = ctk.CTkFrame(self, fg_color="transparent")
+        self.input_card.pack(fill="x", pady=(10, 0), padx=10)
 
         self.input_label = ctk.CTkLabel(self.input_card, text="YouTube Video or Playlist URL", font=ctk.CTkFont(family="Segoe UI", size=15, weight="bold"), text_color=("#111827", "#e5e7eb"))
         self.input_label.pack(anchor="w", padx=25, pady=(25, 10))
@@ -39,7 +43,7 @@ class MainAreaFrame(ctk.CTkFrame):
         self.download_btn.pack(side="right")
 
         # ====== PREVIEW CARD ======
-        self.preview_card = ctk.CTkFrame(self, fg_color=("#FFFFFF", "#1A1A1A"), corner_radius=16, border_width=1, border_color="#E52D27")
+        self.preview_card = ctk.CTkFrame(self.input_card, fg_color=("#FFFFFF", "#1A1A1A"), corner_radius=16, border_width=1, border_color="#E52D27")
         
         self.thumbnail_label = ctk.CTkLabel(self.preview_card, text="", width=80, height=80, fg_color=("#F3F4F6", "#2A2A2A"), corner_radius=8)
         self.thumbnail_label.pack(side="left", padx=(15, 15), pady=15)
@@ -52,9 +56,12 @@ class MainAreaFrame(ctk.CTkFrame):
 
         self.preview_artist = ctk.CTkLabel(self.info_frame, text="Paste a link above", font=ctk.CTkFont(family="Segoe UI", size=14), text_color=("#6B7280", "#a1a1aa"), anchor="w")
         self.preview_artist.pack(fill="x", pady=(2, 0))
+        
+        # Spacer to force CustomTkinter to draw the border to the right edge
+        ctk.CTkFrame(self.preview_card, width=1, height=1, fg_color="transparent").pack(side="right")
 
         # Progress Card
-        self.progress_card = ctk.CTkFrame(self, fg_color=("#FFFFFF", "#1A1A1A"), corner_radius=18, border_width=1, border_color=("#E5E7EB", "#2A2A2A"))
+        self.progress_card = ctk.CTkFrame(self.input_card, fg_color=("#FFFFFF", "#1A1A1A"), corner_radius=18, border_width=1, border_color=("#E5E7EB", "#2A2A2A"))
         # Initially hide the progress card to prevent empty UI blocks
         # self.progress_card.pack(fill="x")
 
@@ -125,6 +132,9 @@ class MainAreaFrame(ctk.CTkFrame):
 
         self.btn_finish = ctk.CTkButton(self.btns_frame, text="Finish", width=80, height=36, fg_color=("#111827", "#f3f4f6"), hover_color=("#374151", "#e5e7eb"), text_color=("#ffffff", "#121212"), state="disabled")
         self.btn_finish.pack(side="left", padx=(5, 0))
+        
+        # Spacer to force CustomTkinter to draw the border to the right edge
+        ctk.CTkFrame(self.progress_card, width=1, height=1, fg_color="transparent").pack(side="right")
 
         # ====== WELCOME / EMPTY STATE ======
         self.welcome_frame = ctk.CTkFrame(self, fg_color="transparent")

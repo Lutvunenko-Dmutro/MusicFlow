@@ -156,7 +156,7 @@ class RightColumnFrame(ctk.CTkFrame):
             # Нормалізуємо шляхи для порівняння (Windows не чутливий до регістру)
             current_path = self.app.player_bar.current_song_path
             if current_path and os.path.normcase(os.path.abspath(current_path)) == os.path.normcase(os.path.abspath(path)):
-                self.app.player_bar.stop()
+                self.app.player_bar.stop_music()
                 try:
                     import pygame
                     pygame.mixer.music.unload()
@@ -183,7 +183,4 @@ class RightColumnFrame(ctk.CTkFrame):
     def on_mode_change(self, choice):
         url = self.app.url_entry.get().strip()
         if url:
-            self.app.main_area.preview_title.configure(text="Fetching info...")
-            self.app.main_area.preview_artist.configure(text="")
-            import threading
-            threading.Thread(target=self.app.fetch_preview_info, args=(url,), daemon=True).start()
+            self.app.preview_manager.trigger_preview(url)
