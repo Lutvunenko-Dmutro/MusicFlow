@@ -73,29 +73,52 @@ class RightColumnFrame(ctk.CTkFrame):
             return
             
         for item in items:
-            item_frame = ctk.CTkFrame(self.history_scroll, fg_color="transparent")
-            item_frame.pack(fill="x", pady=5)
+            item_frame = ctk.CTkFrame(self.history_scroll, fg_color="transparent", corner_radius=8)
+            item_frame.pack(fill="x", pady=2, padx=2)
+            
+            item_frame.grid_columnconfigure(1, weight=1)
+            item_frame.grid_columnconfigure(0, weight=0)
+            item_frame.grid_columnconfigure(2, weight=0)
+            item_frame.grid_columnconfigure(3, weight=0)
+
+            # Hover effects
+            def on_enter(e, frame=item_frame):
+                frame.configure(fg_color=("#F3F4F6", "#2A2A2A"))
+            def on_leave(e, frame=item_frame):
+                frame.configure(fg_color="transparent")
+                
+            item_frame.bind("<Enter>", on_enter)
+            item_frame.bind("<Leave>", on_leave)
             
             if item['cover_img']:
                 photo = ctk.CTkImage(light_image=item['cover_img'], dark_image=item['cover_img'], size=(36, 36))
-                thumb_lbl = ctk.CTkLabel(item_frame, image=photo, text="", fg_color=("#F9FAFB", "#121212"), corner_radius=6)
-                thumb_lbl.pack(side="left", padx=(0, 10))
-
-            del_btn = ctk.CTkButton(item_frame, text="🗑", width=25, height=30, fg_color="transparent", hover_color=("#FCA5A5", "#5a1818"), text_color="#ef4444", font=ctk.CTkFont(size=14), command=lambda p=item['path'], fn=item['filename']: self.confirm_delete(p, fn))
-            del_btn.pack(side="right", padx=(5, 15))
-
-            play_btn = ctk.CTkButton(item_frame, text="▶", width=30, height=30, fg_color="transparent", hover_color=("#E5E7EB", "#333333"), text_color="#10b981", command=lambda p=item['path']: self.app.play_specific_music(p))
-            play_btn.pack(side="right", padx=(5, 0))
+                thumb_lbl = ctk.CTkLabel(item_frame, image=photo, text="", fg_color="transparent")
+                thumb_lbl.grid(row=0, column=0, padx=(8, 10), pady=6)
+                thumb_lbl.bind("<Enter>", on_enter)
+                thumb_lbl.bind("<Leave>", on_leave)
 
             info_frame = ctk.CTkFrame(item_frame, fg_color="transparent")
-            info_frame.pack(side="left", fill="both", expand=True)
+            info_frame.grid(row=0, column=1, sticky="ew", pady=6)
+            info_frame.bind("<Enter>", on_enter)
+            info_frame.bind("<Leave>", on_leave)
             
             display_name = item['filename']
-            if len(display_name) > 28: display_name = display_name[:25] + "..."
-            name_lbl = ctk.CTkLabel(info_frame, text=display_name, font=ctk.CTkFont(size=12, weight="bold"), text_color=("#374151", "#d1d5db"), anchor="w", justify="left")
+            if len(display_name) > 30: display_name = display_name[:27] + "..."
+            name_lbl = ctk.CTkLabel(info_frame, text=display_name, font=ctk.CTkFont(family="Segoe UI", size=13, weight="bold"), text_color=("#111827", "#f1f5f9"), anchor="w", justify="left")
             name_lbl.pack(fill="x")
-            size_lbl = ctk.CTkLabel(info_frame, text=f"{item['size_mb']:.1f} MB", font=ctk.CTkFont(size=11), text_color=("#9CA3AF", "#6b7280"), anchor="w")
+            name_lbl.bind("<Enter>", on_enter)
+            name_lbl.bind("<Leave>", on_leave)
+            
+            size_lbl = ctk.CTkLabel(info_frame, text=f"{item['size_mb']:.1f} MB", font=ctk.CTkFont(family="Segoe UI", size=11), text_color=("#6B7280", "#6b7280"), anchor="w")
             size_lbl.pack(anchor="w")
+            size_lbl.bind("<Enter>", on_enter)
+            size_lbl.bind("<Leave>", on_leave)
+
+            play_btn = ctk.CTkButton(item_frame, text="▶", width=32, height=32, corner_radius=6, fg_color="transparent", hover_color=("#E5E7EB", "#333333"), text_color="#10b981", font=ctk.CTkFont(size=14), command=lambda p=item['path']: self.app.play_specific_music(p))
+            play_btn.grid(row=0, column=2, padx=(2, 2))
+
+            del_btn = ctk.CTkButton(item_frame, text="🗑", width=32, height=32, corner_radius=6, fg_color="transparent", hover_color=("#FCA5A5", "#5a1818"), text_color="#ef4444", font=ctk.CTkFont(size=14), command=lambda p=item['path'], fn=item['filename']: self.confirm_delete(p, fn))
+            del_btn.grid(row=0, column=3, padx=(2, 8))
 
     def confirm_delete(self, path, filename):
         # Create a simple confirmation dialog

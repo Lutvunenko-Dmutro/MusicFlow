@@ -12,9 +12,9 @@ FFT_SIZE    = 8192          # larger = finer frequency resolution (5.38 Hz/bin v
 # Per-Band AGC (leaky integrator) — adapts to any music loudness automatically
 AGC_ALPHA   = 0.02
 AGC_MIN     = 1e-6
-ATTACK      = 0.90
-RELEASE     = 0.22
-GRAVITY     = 0.9
+ATTACK      = 0.80
+RELEASE     = 0.15
+GRAVITY     = 0.35
 
 class AudioVisualizer(tk.Canvas):
     def __init__(self, master, app=None, bg_color="#181818", fg_color="#E52D27",
@@ -39,7 +39,7 @@ class AudioVisualizer(tk.Canvas):
         self._lines    = []
         self._dots     = []
         self._audio_frames = []
-        self._fps      = 30
+        self._fps      = 60  # Ultra smooth 60 FPS
         self._is_playing = False
 
         self.bind("<Configure>", lambda e: self._build_bars())
@@ -69,23 +69,53 @@ class AudioVisualizer(tk.Canvas):
         self._dots.clear()
 
         W = self.winfo_width()
-        if W < 10:
-            W = int(self["width"])
+        if W < 10: W = 200
 
-        total_w = self.bars * (self.bar_w + self.spacing) - self.spacing
-        ox = (W - total_w) // 2
+        num_blocks = 5
+        group_size = self.bars // num_blocks
+        block_gap = 12  # Space between the 5 blocks
 
+        total_w = self.bars * (self.bar_w + self.spacing) + (num_blocks - 1) * block_gap
+        start_x = max(0, (W - total_w) // 2)
+
+        current_x = start_x
         for i in range(self.bars):
-            x = ox + i * (self.bar_w + self.spacing) + self.bar_w // 2
-            color = self._bar_color(i)
+            # Determine which block this bar belongs to (0 to 4)
+            block_index = min(num_blocks - 1, i // group_size)
+            
+            # Colors for the 5 blocks
+            if block_index == 0:
+                bar_color = "#E52D27"   # Sub-bass: Deep Red
+                dot_color = "#FF4B4B"
+            elif block_index == 1:
+                bar_color = "#F59E0B"   # Bass: Orange
+                dot_color = "#FCD34D"
+            elif block_index == 2:
+                bar_color = "#FBBF24"   # Mids: Yellow
+                dot_color = "#FDE68A"
+            elif block_index == 3:
+                bar_color = "#38BDF8"   # High-mids: Light Blue
+                dot_color = "#7DD3FC"
+            else:
+                bar_color = "#3B82F6"   # Treble: Deep Blue
+                dot_color = "#93C5FD"
+
+            # Add gap between blocks
+            if i > 0 and i % group_size == 0 and i < self.bars - 1:
+                current_x += block_gap
+
+            x = current_x
+            
+            # Bottom line (the bar itself)
             line = self.create_line(x, self.FLOOR, x, self.FLOOR,
-                                    fill=color, width=self.bar_w,
-                                    capstyle=tk.ROUND, state="hidden" if not self._is_playing else "normal")
-            dot = self.create_line(x, self.FLOOR, x, self.FLOOR,
-                                   fill="#39FF14", width=self.bar_w,
-                                   capstyle=tk.ROUND, state="hidden" if not self._is_playing else "normal")
+                                    fill=bar_color, width=self.bar_w, capstyle=tk.ROUND, state="hidden" if not self._is_playing else "normal")
+            # Peak dot
+            dot = self.create_rectangle(x - 1, self.FLOOR, x + 1, self.FLOOR + 2,
+                                        fill=dot_color, outline="", state="hidden" if not self._is_playing else "normal")
             self._lines.append(line)
             self._dots.append(dot)
+            
+            current_x += (self.bar_w + self.spacing)
 
         self._bar_h[:] = 0.0
         self._dot_y[:] = self.FLOOR
@@ -98,9 +128,9 @@ class AudioVisualizer(tk.Canvas):
         cache_dir = os.path.join(music_dir, ".viz_cache")
         os.makedirs(cache_dir, exist_ok=True)
         
-        # Cache key: file path + size + FFT settings
+        # Cache key: file path + size + FFT settings + librosa version
         file_size = os.path.getsize(filepath) if os.path.exists(filepath) else 0
-        raw_key = f"{filepath}|{file_size}|{FFT_SIZE}|{self.bars}"
+        raw_key = f"{filepath}|{file_size}|LIBROSA_SMART_STEMS_V1|{self.bars}"
         key_hash = hashlib.md5(raw_key.encode()).hexdigest()
         return os.path.join(cache_dir, f"{key_hash}.npy")
 
@@ -121,64 +151,79 @@ class AudioVisualizer(tk.Canvas):
                     print(f"[Visualizer] Cache read failed, recomputing: {e}")
 
             # --- Cache miss: full FFT analysis ---
+            # --- Cache miss: full FFT analysis ---
             print(f"[Visualizer] 🔍 Analysing: {os.path.basename(filepath)}")
             try:
-                try:
-                    import static_ffmpeg
-                    ffmpeg = static_ffmpeg.get_ffmpeg_exe()
-                except Exception:
-                    ffmpeg = "ffmpeg"
-
-                cmd = [ffmpeg, "-i", filepath, "-f", "s16le", "-ac", "1", "-ar", str(SAMPLE_RATE), "-loglevel", "quiet", "-"]
+                import librosa
+                import scipy.signal
                 
-                # Helper to get spectrum data
-                def get_spectrum_data():
-                    import os
-                    creationflags = subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0
-                    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, creationflags=creationflags)
-                    chunk = SAMPLE_RATE // self._fps
-                    buf = np.zeros(FFT_SIZE, dtype=np.float32)
-                    win = np.hanning(FFT_SIZE).astype(np.float32)
-                    hz_per_bin = SAMPLE_RATE / FFT_SIZE
-                    lo_bin = max(1, int(20 / hz_per_bin))
-                    hi_bin = min(FFT_SIZE // 2, int(16000 / hz_per_bin))
-                    edges = np.logspace(np.log10(lo_bin), np.log10(hi_bin), self.bars + 1, dtype=int)
-                    
-                    data_list = []
-                    while True:
-                        raw = proc.stdout.read(chunk * 2)
-                        if len(raw) < chunk * 2: break
-                        new_s = (np.frombuffer(raw, dtype=np.int16).astype(np.float32) / 32768.0)
-                        buf = np.roll(buf, -chunk)
-                        buf[-chunk:] = new_s
-                        spec = np.abs(np.fft.rfft(buf * win)) / FFT_SIZE
-                        bands = [float(np.sqrt(np.mean(spec[edges[k]:max(edges[k]+1, edges[k+1])]**2))) for k in range(self.bars)]
-                        data_list.append(bands)
-                    return np.array(data_list)
-
-                raw_data = get_spectrum_data()
+                # Load audio with librosa
+                y, sr = librosa.load(filepath, sr=22050, mono=True)
                 
-                # Pass 1: compute per-band 95th percentile energy as AGC reference
-                # p95 means: only the loudest 5% of moments will push bars near the top
-                agc_p95 = np.array([
-                    max(AGC_MIN, float(np.percentile(raw_data[:, k], 95)))
-                    if len(raw_data) > 0 else AGC_MIN
-                    for k in range(self.bars)
-                ], dtype=np.float64)
+                # ---------------------------------------------------------
+                # SMART STEM SEPARATION (AI-like instrument isolation)
+                # ---------------------------------------------------------
+                # 1. Isolate Percussion (Drums, Kicks, Snares, Cymbals)
+                y_perc = librosa.effects.percussive(y, margin=2.0)
                 
-                # Pass 2: Generate frames using p95 as ceiling reference
-                # tanh(1.0 * 0.85) = 0.69 at p95 level → bars sit at ~69% height normally
-                # Only extreme transients briefly touch ~85-90%
-                agc_curr = agc_p95.copy()
-                for bands in raw_data:
-                    frame = []
-                    for k in range(self.bars):
-                        normalized = bands[k] / agc_curr[k]
-                        val = float(np.tanh(normalized * 0.85))
-                        frame.append(val)
-                        # Slowly adapt to long-term changes in volume
-                        agc_curr[k] = AGC_ALPHA * max(bands[k], AGC_MIN) + (1 - AGC_ALPHA) * agc_curr[k]
-                    self._audio_frames.append(frame)
+                # 2. Isolate Harmonics (Vocals, Guitars, Synths)
+                y_harm = librosa.effects.harmonic(y, margin=2.0)
+                
+                # 3. Isolate Pure Bass (< 250 Hz) using a Low-Pass Filter
+                def lowpass_filter(data, cutoff, fs, order=5):
+                    nyq = 0.5 * fs
+                    normal_cutoff = cutoff / nyq
+                    b, a = scipy.signal.butter(order, normal_cutoff, btype='low', analog=False)
+                    return scipy.signal.lfilter(b, a, data)
+                
+                y_bass = lowpass_filter(y, cutoff=250.0, fs=sr)
+                
+                # Calculate hop length to match our FPS
+                hop_length = int(sr / self._fps)
+                
+                # ---------------------------------------------------------
+                # GENERATE SPECTROGRAMS FOR EACH INSTRUMENT (12 bars each)
+                # ---------------------------------------------------------
+                bars_per_block = self.bars // 5  # 12 bars
+                
+                # Block 0: BASS (Deep, smooth, low frequencies)
+                S_bass = librosa.feature.melspectrogram(y=y_bass, sr=sr, n_mels=bars_per_block, fmin=20, fmax=250, hop_length=hop_length)
+                
+                # Block 1: DRUMS (Punchy, percussive impacts)
+                S_drums = librosa.feature.melspectrogram(y=y_perc, sr=sr, n_mels=bars_per_block, fmin=50, fmax=1000, hop_length=hop_length)
+                
+                # Block 2: VOCALS / GUITAR (Harmonic mid-range)
+                S_vocals = librosa.feature.melspectrogram(y=y_harm, sr=sr, n_mels=bars_per_block, fmin=300, fmax=3000, hop_length=hop_length)
+                
+                # Block 3: SYNTHS / HIGH MELODY (Harmonic high-range)
+                S_melody = librosa.feature.melspectrogram(y=y_harm, sr=sr, n_mels=bars_per_block, fmin=1500, fmax=6000, hop_length=hop_length)
+                
+                # Block 4: CYMBALS / HI-HATS (Percussive high-range)
+                S_cymbals = librosa.feature.melspectrogram(y=y_perc, sr=sr, n_mels=bars_per_block, fmin=4000, fmax=10000, hop_length=hop_length)
+                
+                # Combine them into one 60-bar matrix
+                S_combined = np.vstack([S_bass, S_drums, S_vocals, S_melody, S_cymbals])
+                
+                # Convert power to Decibels (dB)
+                S_db = librosa.power_to_db(S_combined, ref=np.max)
+                
+                # NORMALIZATION:
+                # We normalize each block separately so that Vocals and Drums don't interfere!
+                # 98th percentile ensures loud beats hit the top, but silence stays at bottom.
+                band_max = np.percentile(S_db, 98, axis=1, keepdims=True)
+                
+                # Dynamic range: 35 dB difference from silence to peak
+                dynamic_range = 35.0
+                S_norm = (S_db - (band_max - dynamic_range)) / dynamic_range
+                S_norm = np.clip(S_norm, 0.0, 1.0)
+                
+                # Punchy curve
+                S_punchy = np.power(S_norm, 1.5)
+                
+                # Transpose to (frames, bars)
+                S_final = S_punchy.T
+                
+                self._audio_frames = S_final.tolist()
 
                 # Save to cache for instant load next time
                 if self._audio_frames:
@@ -214,8 +259,13 @@ class AudioVisualizer(tk.Canvas):
         try:
             import pygame
             if pygame.mixer.music.get_busy():
-                pos_ms = pygame.mixer.music.get_pos()
-                frame_idx = int(pos_ms / 1000.0 * self._fps)
+                pos_sec = 0.0
+                if self.app and hasattr(self.app, 'player_bar') and self.app.player_bar.engine:
+                    pos_sec = self.app.player_bar.engine.get_actual_pos()
+                else:
+                    pos_sec = pygame.mixer.music.get_pos() / 1000.0
+                    
+                frame_idx = int(pos_sec * self._fps)
 
                 if 0 <= frame_idx < len(self._audio_frames):
                     targets = self._audio_frames[frame_idx]
@@ -249,7 +299,7 @@ class AudioVisualizer(tk.Canvas):
                 # Peak dot physics
                 if bar_top <= self._dot_y[i]:
                     self._dot_y[i] = bar_top
-                    self._dot_v[i] = -1.5          # upward kick
+                    self._dot_v[i] = -0.8          # gentle upward kick
                 else:
                     self._dot_v[i] += GRAVITY
                     self._dot_y[i] += self._dot_v[i]

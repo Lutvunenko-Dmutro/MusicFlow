@@ -21,6 +21,8 @@ class PlayerBarFrame(ctk.CTkFrame):
 
         self.shuffle_enabled = False
         self.repeat_mode = 0 # 0=off, 1=all, 2=one
+        self.is_seeking = False
+        self.seek_timer = None
 
         # Load premium icons
         icons_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "icons")
@@ -88,7 +90,7 @@ class PlayerBarFrame(ctk.CTkFrame):
         self.visualizer = AudioVisualizer(
             self.visualizer_frame,
             app=self.app,
-            width=240, height=48, bars=100
+            width=240, height=48, bars=60
         )
         self.visualizer.pack()
 
@@ -104,9 +106,26 @@ class PlayerBarFrame(ctk.CTkFrame):
         btn_cfg = dict(text="", fg_color="transparent", hover_color=("#E5E7EB", "#1e1e1e"), corner_radius=20)
         btn_text_cfg = dict(fg_color="transparent", hover_color=("#E5E7EB", "#1e1e1e"), corner_radius=20, font=ctk.CTkFont(size=18), text_color=("#6B7280", "#9ca3af"))
 
+        # Load PNG icons
+        shuffle_path = os.path.join("icons", "shuffle.png")
+        shuffle_act_path = os.path.join("icons", "shuffle_active.png")
+        repeat_path = os.path.join("icons", "repeat.png")
+        repeat_act_path = os.path.join("icons", "repeat_active.png")
+        repeat_one_path = os.path.join("icons", "repeat_one.png")
+        repeat_one_act_path = os.path.join("icons", "repeat_one_active.png")
+        
+        self.icon_shuffle = ctk.CTkImage(Image.open(shuffle_path), size=(20, 20)) if os.path.exists(shuffle_path) else None
+        self.icon_shuffle_act = ctk.CTkImage(Image.open(shuffle_act_path), size=(20, 20)) if os.path.exists(shuffle_act_path) else None
+        
+        self.icon_repeat = ctk.CTkImage(Image.open(repeat_path), size=(20, 20)) if os.path.exists(repeat_path) else None
+        self.icon_repeat_act = ctk.CTkImage(Image.open(repeat_act_path), size=(20, 20)) if os.path.exists(repeat_act_path) else None
+        
+        self.icon_repeat_one = ctk.CTkImage(Image.open(repeat_one_path), size=(20, 20)) if os.path.exists(repeat_one_path) else None
+        self.icon_repeat_one_act = ctk.CTkImage(Image.open(repeat_one_act_path), size=(20, 20)) if os.path.exists(repeat_one_act_path) else None
+
         self.btn_shuffle = ctk.CTkButton(
-            self.controls_frame, text="🔀", width=40, height=40,
-            command=self.toggle_shuffle, **btn_text_cfg
+            self.controls_frame, image=self.icon_shuffle, width=40, height=40,
+            command=self.toggle_shuffle, **btn_cfg
         )
         self.btn_shuffle.pack(side="left", padx=(0, 4))
 
@@ -137,8 +156,8 @@ class PlayerBarFrame(ctk.CTkFrame):
         self.btn_stop.pack(side="left", padx=(8, 4))
 
         self.btn_repeat = ctk.CTkButton(
-            self.controls_frame, text="🔁", width=40, height=40,
-            command=self.toggle_repeat, **btn_text_cfg
+            self.controls_frame, image=self.icon_repeat, width=40, height=40,
+            command=self.toggle_repeat, **btn_cfg
         )
         self.btn_repeat.pack(side="left", padx=(0, 0))
 
@@ -162,6 +181,9 @@ class PlayerBarFrame(ctk.CTkFrame):
             progress_color="#E52D27",
             height=12
         )
+        # Bind events for seeking start and end to improve UX
+        self.progress_slider.bind("<ButtonPress-1>", lambda e: setattr(self, "is_seeking", True))
+        self.progress_slider.bind("<ButtonRelease-1>", lambda e: self.perform_seek(self.progress_slider.get()))
         self.progress_slider.set(0)
         self.progress_slider.pack(side="left", padx=8)
 
@@ -314,7 +336,20 @@ class PlayerBarFrame(ctk.CTkFrame):
             print(f"Error playing {path}: {e}")
 
     def toggle_play(self):
-        if not self.engine.current_song_path: return
+        if not self.engine.current_song_path:
+            # Спроба завантажити останню пісню з історії прослуховування
+            try:
+                import os
+                from core.history_manager import get_json_history
+                history = get_json_history()
+                for item in history:
+                    path = item.get('filepath')
+                    if path and os.path.exists(path):
+                        self.play_specific_music(path)
+                        return
+            except Exception as e:
+                print(f"Failed to load from history: {e}")
+            return
 
         if self.engine.is_playing:
             self.engine.pause()
@@ -338,6 +373,15 @@ class PlayerBarFrame(ctk.CTkFrame):
 
     def seek(self, value):
         if not self.engine.current_song_path: return
+        self.is_seeking = True
+        if self.seek_timer:
+            self.after_cancel(self.seek_timer)
+        # Debounce the seek by 200ms
+        self.seek_timer = self.after(200, lambda v=value: self.perform_seek(v))
+        
+    def perform_seek(self, value):
+        if not self.engine.current_song_path: return
+        self.is_seeking = False
         pos = (float(value) / 100) * self.engine.song_length
         self.engine.seek(pos)
 
@@ -347,18 +391,18 @@ class PlayerBarFrame(ctk.CTkFrame):
     def toggle_shuffle(self):
         self.shuffle_enabled = not self.shuffle_enabled
         if self.shuffle_enabled:
-            self.btn_shuffle.configure(text_color="#E52D27")
+            self.btn_shuffle.configure(image=self.icon_shuffle_act, text="")
         else:
-            self.btn_shuffle.configure(text_color=("#6B7280", "#9ca3af"))
+            self.btn_shuffle.configure(image=self.icon_shuffle, text="")
 
     def toggle_repeat(self):
         self.repeat_mode = (self.repeat_mode + 1) % 3
         if self.repeat_mode == 0:
-            self.btn_repeat.configure(text="🔁", text_color=("#6B7280", "#9ca3af"))
+            self.btn_repeat.configure(image=self.icon_repeat, text="")
         elif self.repeat_mode == 1:
-            self.btn_repeat.configure(text="🔁", text_color="#E52D27")
+            self.btn_repeat.configure(image=self.icon_repeat_act, text="")
         elif self.repeat_mode == 2:
-            self.btn_repeat.configure(text="🔂", text_color="#E52D27")
+            self.btn_repeat.configure(image=self.icon_repeat_one_act, text="")
 
     def format_time(self, seconds):
         m = int(seconds // 60)
@@ -429,7 +473,8 @@ class PlayerBarFrame(ctk.CTkFrame):
             if self.engine.song_length > 0:
                 percent = (actual_pos / self.engine.song_length) * 100
                 if percent <= 100:
-                    self.progress_slider.set(percent)
+                    if not self.is_seeking:
+                        self.progress_slider.set(percent)
                     self.time_current_lbl.configure(text=self.format_time(actual_pos))
                     
                     if hasattr(self, 'lyrics_ui') and getattr(self.lyrics_ui, 'dialog', None) and self.lyrics_ui.dialog.winfo_exists():

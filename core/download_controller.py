@@ -20,7 +20,10 @@ class DownloadController:
             return
 
         # Setup progress preview
+        self.app.main_area.welcome_frame.pack_forget()
         self.app.main_area.preview_card.pack_forget()
+        self.app.main_area.progress_card.pack(fill="x")
+        
         thumb = self.app.main_area.thumbnail_label.cget("image")
         if thumb:
             self.app.main_area.prog_thumb.configure(image=thumb)
@@ -77,6 +80,13 @@ class DownloadController:
         self.app.download_btn.configure(state="normal")
         self.app.url_entry.delete(0, 'end')
         self.app.right_column.load_history()
+        
+        # Hide progress and show welcome screen after success
+        self.app.after(3000, lambda: self.reset_to_welcome())
+
+    def reset_to_welcome(self):
+        self.app.main_area.progress_card.pack_forget()
+        self.app.main_area.welcome_frame.pack(fill="both", expand=True, pady=40)
 
     def update_progress(self, percent, details=None):
         if details and 'item_finished' in details:
@@ -139,7 +149,8 @@ class DownloadController:
 
         def set_process_cb(p):
             self.current_download_process = p
-            from core.download_engine import download_and_process_music
+            
+        from core.download_engine import download_and_process_music
         # Передаємо керування в Engine. qual також передається з налаштувань, якщо потрібно.
         qual = self.app.config.get("quality", "320")
         use_sponsorblock = self.app.config.get("use_sponsorblock", True)

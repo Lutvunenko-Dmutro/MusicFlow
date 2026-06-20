@@ -7,7 +7,8 @@ class PreviewManager:
         self.app = app
 
     def trigger_preview(self, url):
-        self.app.main_area.preview_card.pack(fill="x", pady=(0, 15), before=self.app.main_area.progress_card)
+        self.app.main_area.welcome_frame.pack_forget()
+        self.app.main_area.preview_card.pack(fill="x", pady=(0, 15))
         self.app.main_area.preview_title.configure(text="Fetching info...")
         self.app.main_area.preview_artist.configure(text="")
         threading.Thread(target=self.fetch_preview_info, args=(url,), daemon=True).start()

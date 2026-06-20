@@ -30,12 +30,12 @@ def _init_db():
 
 def get_json_history():
     """Load the full persistent download history from SQLite (keeps function name for compatibility)."""
+    conn = None
     try:
         conn = _init_db()
         cursor = conn.cursor()
         cursor.execute("SELECT title, artist, url, filepath, timestamp FROM history ORDER BY id DESC")
         rows = cursor.fetchall()
-        conn.close()
         
         history = []
         for row in rows:
@@ -50,9 +50,13 @@ def get_json_history():
     except Exception as e:
         print(f"Error reading DB: {e}")
         return []
+    finally:
+        if conn:
+            conn.close()
 
 def add_to_json_history(title, artist, url, filepath):
     """Add a completed download or played song to the SQLite database."""
+    conn = None
     try:
         conn = _init_db()
         cursor = conn.cursor()
@@ -75,20 +79,25 @@ def add_to_json_history(title, artist, url, filepath):
             cursor.execute("DELETE FROM history WHERE id IN (SELECT id FROM history ORDER BY id ASC LIMIT ?)", (count - 200,))
             
         conn.commit()
-        conn.close()
     except Exception as e:
         print(f"Error saving to DB: {e}")
+    finally:
+        if conn:
+            conn.close()
 
 def clear_json_history():
     """Clears all history from the database."""
+    conn = None
     try:
         conn = _init_db()
         cursor = conn.cursor()
         cursor.execute("DELETE FROM history")
         conn.commit()
-        conn.close()
     except Exception:
         pass
+    finally:
+        if conn:
+            conn.close()
 
 # Alias for settings.py compatibility
 clear_history_data = clear_json_history
@@ -153,14 +162,17 @@ def delete_history_files(path):
     """
     try:
         # 1. Remove from database
+        conn = None
         try:
             conn = sqlite3.connect(DB_FILE)
             cursor = conn.cursor()
             cursor.execute("DELETE FROM history WHERE filepath = ?", (path,))
             conn.commit()
-            conn.close()
         except Exception:
             pass
+        finally:
+            if conn:
+                conn.close()
 
         # 2. Delete actual files
         if os.path.exists(path):

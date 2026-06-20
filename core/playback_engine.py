@@ -22,18 +22,19 @@ class PlaybackEngine:
             pygame.mixer.music.load(path)
             self.current_song_path = path
             
-            # Спробуємо отримати точну довжину
+            # Отримуємо точну довжину без завантаження всього файлу в RAM!
+            self.song_length = 0.0
             try:
                 from mutagen.mp3 import MP3
                 audio = MP3(path)
                 if audio is not None and hasattr(audio.info, 'length'):
                     self.song_length = audio.info.length
-                else:
-                    self.song_length = pygame.mixer.Sound(path).get_length()
-            except Exception:
-                self.song_length = pygame.mixer.Sound(path).get_length()
+            except Exception as e:
+                print(f"Mutagen failed to read length: {e}")
                 
             self.current_pos = 0.0
+            self.is_playing = False # СКИДАЄМО СТАТУС ПРИ ЗАВАНТАЖЕННІ НОВОЇ ПІСНІ!
+            self.is_paused = False
             return True
         except Exception as e:
             print(f"Помилка завантаження пісні: {e}")
@@ -47,8 +48,9 @@ class PlaybackEngine:
         if self.is_playing:
             return True # Вже грає
             
-        if self.current_pos > 0:
+        if getattr(self, 'is_paused', False):
             pygame.mixer.music.unpause()
+            self.is_paused = False
         else:
             pygame.mixer.music.play()
             
@@ -60,6 +62,7 @@ class PlaybackEngine:
         if self.is_playing:
             pygame.mixer.music.pause()
             self.is_playing = False
+            self.is_paused = True
 
     def seek(self, pos_seconds):
         """Перемотує пісню на вказану секунду"""
@@ -67,8 +70,10 @@ class PlaybackEngine:
         
         self.current_pos = pos_seconds
         pygame.mixer.music.play(start=pos_seconds)
+        self.is_paused = False
         if not self.is_playing:
             pygame.mixer.music.pause()
+            self.is_paused = True
 
     def set_volume(self, volume):
         """Встановлює гучність (0.0 - 1.0)"""

@@ -25,6 +25,8 @@ class App(ctk.CTk):
         self.geometry("1150x680")
         self.minsize(900, 600)
         
+        self.protocol("WM_DELETE_WINDOW", self.on_closing)
+        
         # Set App Icon
         icon_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "icon.ico")
         if os.path.exists(icon_path):
@@ -145,11 +147,13 @@ class App(ctk.CTk):
         ToastNotification.show(self, message, toast_type)
 
     def on_closing(self):
-        self.url_entry.configure(state="normal")
-        self.paste_btn.configure(state="normal")
-        self.download_btn.configure(state="disabled")
-        self.url_entry.delete(0, 'end')
-        self.main_area.preview_card.pack_forget()
+        try:
+            import pygame
+            pygame.mixer.quit()
+        except Exception:
+            pass
+        self.destroy()
+        sys.exit(0)
 
     def reset_ui(self):
         self.url_entry.configure(state="normal")
@@ -157,6 +161,8 @@ class App(ctk.CTk):
         self.download_btn.configure(state="disabled")
         self.url_entry.delete(0, 'end')
         self.main_area.preview_card.pack_forget()
+        self.main_area.progress_card.pack_forget()
+        self.main_area.welcome_frame.pack(fill="both", expand=True, pady=40)
         self.main_area.btn_finish.configure(state="disabled")
         self.main_area.btn_cancel.configure(state="disabled")
         self.progressbar.set(0)
@@ -184,35 +190,36 @@ class App(ctk.CTk):
         self.right_column.grid(row=0, column=2, sticky="nsew", padx=(10, 20), pady=20)
         self.reset_sidebar_buttons()
         # Встановлюємо активний колір для тексту (наприклад червоний або білий)
-        self.sidebar.btn_dashboard.configure(text_color="#E52D27")
+        self.sidebar.btn_dashboard.configure(text_color="#E52D27", fg_color=("#E5E7EB", "#1A1A1A"))
 
     def show_library(self):
         self.hide_all_areas()
         self.library_area.load_library()
         self.library_area.grid(row=0, column=1, columnspan=2, sticky="nsew", padx=20, pady=20)
         self.reset_sidebar_buttons()
-        self.sidebar.btn_library.configure(text_color="#E52D27")
+        self.sidebar.btn_library.configure(text_color="#E52D27", fg_color=("#E5E7EB", "#1A1A1A"))
 
     def show_history(self):
         self.hide_all_areas()
         self.history_area.load_history()
         self.history_area.grid(row=0, column=1, columnspan=2, sticky="nsew", padx=20, pady=20)
         self.reset_sidebar_buttons()
-        self.sidebar.btn_history.configure(text_color="#E52D27")
+        self.sidebar.btn_history.configure(text_color="#E52D27", fg_color=("#E5E7EB", "#1A1A1A"))
 
     def show_settings(self):
         self.hide_all_areas()
         self.settings_area.grid(row=0, column=1, columnspan=2, sticky="nsew", padx=20, pady=20)
         self.reset_sidebar_buttons()
-        self.sidebar.btn_settings.configure(text_color="#E52D27")
+        self.sidebar.btn_settings.configure(text_color="#E52D27", fg_color=("#E5E7EB", "#1A1A1A"))
 
     def reset_sidebar_buttons(self):
         # Повертаємо всім кнопкам стандартний колір
         default_color = ("#374151", "#d1d5db")
-        self.sidebar.btn_dashboard.configure(text_color=default_color)
-        self.sidebar.btn_library.configure(text_color=default_color)
-        self.sidebar.btn_history.configure(text_color=default_color)
-        self.sidebar.btn_settings.configure(text_color=("#6B7280", "#9ca3af"))
+        default_fg = "transparent"
+        self.sidebar.btn_dashboard.configure(text_color=default_color, fg_color=default_fg)
+        self.sidebar.btn_library.configure(text_color=default_color, fg_color=default_fg)
+        self.sidebar.btn_history.configure(text_color=default_color, fg_color=default_fg)
+        self.sidebar.btn_settings.configure(text_color=("#6B7280", "#9ca3af"), fg_color=default_fg)
 
     def open_folder(self):
         if sys.platform == "win32":

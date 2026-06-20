@@ -18,25 +18,25 @@ class MainAreaFrame(ctk.CTkFrame):
 
         self.url_entry = ctk.CTkEntry(
             self.input_row, placeholder_text="https://www.youtube.com/watch?v=...", 
-            height=48, font=ctk.CTkFont(family="Segoe UI", size=14), border_color=("#D1D5DB", "#333333"), 
-            fg_color=("#F9FAFB", "#121212"), border_width=1, corner_radius=10
+            height=42, font=ctk.CTkFont(family="Segoe UI", size=14), border_color=("#D1D5DB", "#333333"), 
+            fg_color=("#F9FAFB", "#121212"), border_width=1, corner_radius=8
         )
-        self.url_entry.pack(side="left", fill="x", expand=True, padx=(0, 15))
+        self.url_entry.pack(side="left", fill="x", expand=True, padx=(0, 10))
 
         self.paste_btn = ctk.CTkButton(
-            self.input_row, text="Paste", width=70, height=48, corner_radius=10, 
-            font=ctk.CTkFont(family="Segoe UI", size=14, weight="bold"), fg_color=("#D1D5DB", "#2A2A2A"), hover_color=("#9CA3AF", "#3A3A3A"), text_color=("#111827", "#ffffff"),
+            self.input_row, text="Paste", width=70, height=42, corner_radius=8, 
+            font=ctk.CTkFont(family="Segoe UI", size=13, weight="bold"), fg_color=("#D1D5DB", "#2A2A2A"), hover_color=("#9CA3AF", "#3A3A3A"), text_color=("#111827", "#ffffff"),
             command=self.app.paste_from_clipboard
         )
-        self.paste_btn.pack(side="right")
+        self.paste_btn.pack(side="left", padx=(0, 10))
 
         self.download_btn = ctk.CTkButton(
-            self.input_card, text="⬇ DOWNLOAD", height=54, corner_radius=12,
-            font=ctk.CTkFont(family="Segoe UI", size=16, weight="bold"), 
+            self.input_row, text="⬇ Download", width=120, height=42, corner_radius=8,
+            font=ctk.CTkFont(family="Segoe UI", size=14, weight="bold"), 
             fg_color="#E52D27", hover_color="#C0201E", command=lambda: self.app.download_controller.start_download_thread(),
             state="disabled"
         )
-        self.download_btn.pack(fill="x", padx=25, pady=(0, 25))
+        self.download_btn.pack(side="right")
 
         # ====== PREVIEW CARD ======
         self.preview_card = ctk.CTkFrame(self, fg_color=("#FFFFFF", "#1A1A1A"), corner_radius=16, border_width=1, border_color="#E52D27")
@@ -55,8 +55,8 @@ class MainAreaFrame(ctk.CTkFrame):
 
         # Progress Card
         self.progress_card = ctk.CTkFrame(self, fg_color=("#FFFFFF", "#1A1A1A"), corner_radius=18, border_width=1, border_color=("#E5E7EB", "#2A2A2A"))
-        # Встановлено expand=False щоб картка не розтягувалась і виглядала компактно
-        self.progress_card.pack(fill="x")
+        # Initially hide the progress card to prevent empty UI blocks
+        # self.progress_card.pack(fill="x")
 
         self.prog_title = ctk.CTkLabel(self.progress_card, text="Download Progress", font=ctk.CTkFont(family="Segoe UI", size=18, weight="bold"), text_color=("#111827", "#ffffff"))
         self.prog_title.pack(anchor="w", pady=(0, 15))
@@ -125,3 +125,16 @@ class MainAreaFrame(ctk.CTkFrame):
 
         self.btn_finish = ctk.CTkButton(self.btns_frame, text="Finish", width=80, height=36, fg_color=("#111827", "#f3f4f6"), hover_color=("#374151", "#e5e7eb"), text_color=("#ffffff", "#121212"), state="disabled")
         self.btn_finish.pack(side="left", padx=(5, 0))
+
+        # ====== WELCOME / EMPTY STATE ======
+        self.welcome_frame = ctk.CTkFrame(self, fg_color="transparent")
+        self.welcome_frame.pack(fill="both", expand=True, pady=40)
+        
+        icon_lbl = ctk.CTkLabel(self.welcome_frame, text="🎸", font=ctk.CTkFont(size=64), text_color=("#D1D5DB", "#333333"))
+        icon_lbl.pack(pady=(20, 10))
+        
+        title_lbl = ctk.CTkLabel(self.welcome_frame, text="Ready to Download", font=ctk.CTkFont(family="Segoe UI", size=20, weight="bold"), text_color=("#374151", "#d1d5db"))
+        title_lbl.pack(pady=(0, 5))
+        
+        hint_lbl = ctk.CTkLabel(self.welcome_frame, text="Paste a YouTube link above to extract music.\nYour history and queue will appear on the right.", font=ctk.CTkFont(family="Segoe UI", size=14), text_color=("#9CA3AF", "#6b7280"), justify="center")
+        hint_lbl.pack()
