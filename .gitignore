@@ -29,7 +29,9 @@ ffprobe.exe
 *.webm
 *.lrc
 
-# History
+# History and Databases
 download_history.json
+*.backup
+*.db
 
 models/

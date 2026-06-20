@@ -8,47 +8,90 @@ try:
 except ImportError:
     ID3 = None
 
-HISTORY_JSON_FILE = "download_history.json"
+import sqlite3
+
+DB_FILE = "download_history.db"
+
+def _init_db():
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS history (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT,
+            artist TEXT,
+            url TEXT,
+            filepath TEXT,
+            timestamp TEXT
+        )
+    ''')
+    conn.commit()
+    return conn
 
 def get_json_history():
-    """Load the full persistent download history from JSON."""
-    if not os.path.exists(HISTORY_JSON_FILE):
-        return []
+    """Load the full persistent download history from SQLite (keeps function name for compatibility)."""
     try:
-        with open(HISTORY_JSON_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except Exception:
+        conn = _init_db()
+        cursor = conn.cursor()
+        cursor.execute("SELECT title, artist, url, filepath, timestamp FROM history ORDER BY id DESC")
+        rows = cursor.fetchall()
+        conn.close()
+        
+        history = []
+        for row in rows:
+            history.append({
+                "title": row[0],
+                "artist": row[1],
+                "url": row[2],
+                "filepath": row[3],
+                "timestamp": row[4]
+            })
+        return history
+    except Exception as e:
+        print(f"Error reading DB: {e}")
         return []
 
 def add_to_json_history(title, artist, url, filepath):
-    """Add a completed download or played song to the persistent JSON history."""
-    history = get_json_history()
-    
-    # Видалити старий запис, якщо такий файл вже є в історії, щоб підняти його наверх
-    history = [item for item in history if item.get("filepath") != filepath]
-    
-    entry = {
-        "title": title or "Unknown Title",
-        "artist": artist or "Unknown Artist",
-        "url": url,
-        "filepath": filepath,
-        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M")
-    }
-    history.insert(0, entry) # add to top
-    history = history[:200]  # limit to 200 items
-    
+    """Add a completed download or played song to the SQLite database."""
     try:
-        with open(HISTORY_JSON_FILE, "w", encoding="utf-8") as f:
-            json.dump(history, f, indent=4, ensure_ascii=False)
+        conn = _init_db()
+        cursor = conn.cursor()
+        
+        # Remove old entry for this file if it exists, to move it to the top
+        cursor.execute("DELETE FROM history WHERE filepath = ?", (filepath,))
+        
+        # Insert new entry
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
+        cursor.execute('''
+            INSERT INTO history (title, artist, url, filepath, timestamp)
+            VALUES (?, ?, ?, ?, ?)
+        ''', (title or "Unknown Title", artist or "Unknown Artist", url, filepath, timestamp))
+        
+        # Limit to 200 items
+        cursor.execute("SELECT COUNT(*) FROM history")
+        count = cursor.fetchone()[0]
+        if count > 200:
+            # Delete oldest (smallest id)
+            cursor.execute("DELETE FROM history WHERE id IN (SELECT id FROM history ORDER BY id ASC LIMIT ?)", (count - 200,))
+            
+        conn.commit()
+        conn.close()
     except Exception as e:
-        print(f"Error saving history: {e}")
+        print(f"Error saving to DB: {e}")
 
 def clear_json_history():
+    """Clears all history from the database."""
     try:
-        if os.path.exists(HISTORY_JSON_FILE):
-            os.remove(HISTORY_JSON_FILE)
+        conn = _init_db()
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM history")
+        conn.commit()
+        conn.close()
     except Exception:
         pass
+
+# Alias for settings.py compatibility
+clear_history_data = clear_json_history
 
 def get_history_items(output_folder, max_items=10, default_icon_path=None):
     """
@@ -106,9 +149,20 @@ def get_history_items(output_folder, max_items=10, default_icon_path=None):
 
 def delete_history_files(path):
     """
-    Deletes the mp3 and associated files (.lrc, .jpg, .webp).
+    Deletes the mp3 and associated files (.lrc, .jpg, .webp), and removes it from SQLite history.
     """
     try:
+        # 1. Remove from database
+        try:
+            conn = sqlite3.connect(DB_FILE)
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM history WHERE filepath = ?", (path,))
+            conn.commit()
+            conn.close()
+        except Exception:
+            pass
+
+        # 2. Delete actual files
         if os.path.exists(path):
             os.remove(path)
             
