@@ -1,8 +1,12 @@
 import os
 import sys
 import warnings
+import static_ffmpeg
 from ui.gui_app import App
 from utils.error_handler import setup_global_error_handling
+
+# Add ffmpeg to PATH automatically
+static_ffmpeg.add_paths()
 
 # Suppress warnings for cleaner console output
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
