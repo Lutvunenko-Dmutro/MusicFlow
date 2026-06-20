@@ -16,7 +16,7 @@ class PreviewManager:
 
     def fetch_preview_info(self, url):
         from utils.youtube_api import get_preview_info
-        is_playlist = "list=" in url
+        is_playlist = "list=" in url and "v=" not in url
         default_icon = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "icons", "music_placeholder.png")
         
         def on_success(title, artist):

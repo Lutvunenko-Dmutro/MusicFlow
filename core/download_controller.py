@@ -11,7 +11,7 @@ class DownloadController:
         url = self.app.url_entry.get().strip()
         # Отримуємо налаштування з правого меню та глобальних налаштувань
         from core.i18n import _
-        is_playlist = "list=" in url
+        is_playlist = "list=" in url and "v=" not in url
         qual = self.app.config.get("quality", "320")
         embed_lrc = self.app.right_column.lyrics_switch.get()
 
@@ -148,18 +148,24 @@ class DownloadController:
         def error_cb(err_msg):
             from core.i18n import _
             safe_msg = str(err_msg).replace("'\n", " ").replace("\n", " | ")
-            self.app.after(0, lambda m=safe_msg: self.app.update_status(_("status_error", "❌ Error: {msg}").replace("{msg}", m)))
-            self.app.after(0, lambda m=safe_msg: self.app.show_toast(_("status_error_toast", "Download Error"), "error"))
-            self.app.after(0, lambda m=safe_msg: self.app.main_area.prog_track_title.configure(text=_("status_error_title", "ERROR!"), text_color="#E52D27"))
-            self.app.after(0, lambda m=safe_msg: self.app.main_area.prog_track_artist.configure(text=m[:60] + "..." if len(m) > 60 else m))
-            self.app.after(0, lambda: self.app.main_area.progressbar.stop() if self.app.main_area.progressbar.cget("mode") == "indeterminate" else None)
-            self.app.after(0, lambda: self.app.main_area.progressbar.configure(mode="determinate"))
-            self.app.after(0, lambda: self.app.main_area.progressbar.set(0))
             
-            self.app.after(0, lambda: self.app.url_entry.configure(state="normal"))
-            self.app.after(0, lambda: self.app.paste_btn.configure(state="normal"))
-            self.app.after(0, lambda: self.app.download_btn.configure(state="normal"))
-            self.app.after(0, lambda: self.app.main_area.btn_cancel.configure(state="disabled"))
+            def update_gui_on_error():
+                self.app.update_status(_("status_error", "❌ Error: {msg}").replace("{msg}", safe_msg))
+                self.app.show_toast(_("status_error_toast", "Download Error"), "error")
+                self.app.main_area.prog_track_title.configure(text=_("status_error_title", "ERROR!"), text_color="#E52D27")
+                self.app.main_area.prog_track_artist.configure(text=safe_msg[:60] + "..." if len(safe_msg) > 60 else safe_msg)
+                
+                if self.app.main_area.progressbar.cget("mode") == "indeterminate":
+                    self.app.main_area.progressbar.stop()
+                self.app.main_area.progressbar.configure(mode="determinate")
+                self.app.main_area.progressbar.set(0)
+                
+                self.app.url_entry.configure(state="normal")
+                self.app.paste_btn.configure(state="normal")
+                self.app.download_btn.configure(state="normal")
+                self.app.main_area.btn_cancel.configure(state="disabled")
+                
+            self.app.after(0, update_gui_on_error)
 
         def set_process_cb(p):
             self.current_download_process = p

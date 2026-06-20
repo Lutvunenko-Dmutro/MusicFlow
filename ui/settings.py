@@ -203,9 +203,36 @@ class SettingsFrame(ctk.CTkFrame):
         self.btn_clear_cache = ctk.CTkButton(row4, text=_("set_btn_cache", "Clear Cache"), width=120, height=35, corner_radius=8, fg_color=("#D1D5DB", "#374151"), hover_color=("#FCA5A5", "#ef4444"), text_color=("#111827", "#ffffff"), command=self.clear_viz_cache)
         self.btn_clear_cache.pack(side="right")
 
+        # Visualizer FPS row
+        row5 = ctk.CTkFrame(card, fg_color="transparent")
+        row5.pack(fill="x", padx=25, pady=(15, 20))
+        lbl5 = ctk.CTkLabel(row5, text=_("set_fps", "Visualizer FPS (30 for weaker PCs)"), justify="left", font=ctk.CTkFont(family="Segoe UI", size=15), text_color=("#374151", "#d1d5db"))
+        lbl5.pack(side="left")
+        
+        self.fps_menu = ctk.CTkOptionMenu(
+            row5, values=["30", "60"], command=self.change_fps, width=120,
+            fg_color=("#F9FAFB", "#121212"), button_color=("#E5E7EB", "#333333"), 
+            button_hover_color=("#D1D5DB", "#4b5563"), text_color=("#111827", "#ffffff"),
+            dropdown_fg_color=("#FFFFFF", "#1A1A1A"), dropdown_hover_color=("#F3F4F6", "#2A2A2A"), 
+            dropdown_text_color=("#111827", "#ffffff")
+        )
+        self.fps_menu.set(str(self.config.get("viz_fps", "60")))
+        self.fps_menu.pack(side="right")
+
+        # Aria2c row
+        row6 = ctk.CTkFrame(card, fg_color="transparent")
+        row6.pack(fill="x", padx=25, pady=(15, 20))
+        lbl6 = ctk.CTkLabel(row6, text=_("set_aria2c", "Use Aria2c for downloads\n(Requires aria2c to be installed)"), justify="left", font=ctk.CTkFont(family="Segoe UI", size=15), text_color=("#374151", "#d1d5db"))
+        lbl6.pack(side="left")
+        
+        self.aria2c_switch = ctk.CTkSwitch(row6, text="", command=self.toggle_aria2c, progress_color="#E52D27")
+        if self.config.get("use_aria2c", False):
+            self.aria2c_switch.select()
+        self.aria2c_switch.pack(side="right")
+
     def get_cache_size(self):
-        app_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        cache_dir = os.path.join(app_dir, ".viz_cache")
+        appdata = os.environ.get('LOCALAPPDATA', os.path.expanduser('~'))
+        cache_dir = os.path.join(appdata, "YouTubeMusicPro", "viz_cache")
         if not os.path.exists(cache_dir):
             return 0
         total = 0
@@ -226,8 +253,8 @@ class SettingsFrame(ctk.CTkFrame):
             self.cache_lbl.configure(text=_("set_cache", "Visualizer Cache\n(Currently {size} MB)").replace("{size}", f"{display_size:.1f}"))
 
     def clear_viz_cache(self):
-        app_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        cache_dir = os.path.join(app_dir, ".viz_cache")
+        appdata = os.environ.get('LOCALAPPDATA', os.path.expanduser('~'))
+        cache_dir = os.path.join(appdata, "YouTubeMusicPro", "viz_cache")
         if os.path.exists(cache_dir):
             try:
                 for f in os.listdir(cache_dir):
@@ -241,7 +268,14 @@ class SettingsFrame(ctk.CTkFrame):
     def toggle_sponsorblock(self):
         self.config["use_sponsorblock"] = bool(self.sponsor_switch.get())
         save_config(self.config)
-
+        
+    def change_fps(self, choice):
+        self.config["viz_fps"] = choice
+        save_config(self.config)
+        
+    def toggle_aria2c(self):
+        self.config["use_aria2c"] = bool(self.aria2c_switch.get())
+        save_config(self.config)
 
     def change_theme(self, display_choice):
         # Map localized label back to English value for ctk and config

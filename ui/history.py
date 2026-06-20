@@ -33,15 +33,26 @@ class HistoryFrame(ctk.CTkFrame):
 
         self.placeholder_img = ctk.CTkImage(light_image=Image.open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "icons", "music_placeholder.png")), size=(40, 40))
         
+        self.placeholder_img = ctk.CTkImage(light_image=Image.open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "icons", "music_placeholder.png")), size=(40, 40))
+        
+        self.current_offset = 0
+        self.limit = 50
+        
         self.load_history()
 
-    def load_history(self):
-        for widget in self.scroll_frame.winfo_children():
-            widget.destroy()
-        from core.history_manager import get_json_history
-        history_data = get_json_history()
+    def load_history(self, append=False):
+        if not append:
+            self.current_offset = 0
+            for widget in self.scroll_frame.winfo_children():
+                widget.destroy()
+                
+        if hasattr(self, 'load_more_btn') and self.load_more_btn.winfo_exists():
+            self.load_more_btn.destroy()
 
-        if not history_data:
+        from core.history_manager import get_json_history
+        history_data = get_json_history(limit=self.limit, offset=self.current_offset)
+
+        if not history_data and not append:
             ctk.CTkLabel(self.scroll_frame, text="Your download history is empty.", font=ctk.CTkFont(size=16), text_color=("#6B7280", "#6b7280")).pack(pady=50)
             return
 
@@ -79,6 +90,14 @@ class HistoryFrame(ctk.CTkFrame):
             else:
                 if url:
                     ctk.CTkButton(row, text="⬇ Redownload", width=100, height=28, fg_color=("#D1D5DB", "#1f2937"), hover_color=("#9CA3AF", "#374151"), text_color=("#111827", "#ffffff"), command=lambda u=url: self.redownload(u)).pack(side="right", padx=5)
+
+        if len(history_data) == self.limit:
+            self.load_more_btn = ctk.CTkButton(self.scroll_frame, text="Load More...", width=200, height=35, corner_radius=8, fg_color=("#E5E7EB", "#2A2A2A"), hover_color=("#D1D5DB", "#3A3A3A"), text_color=("#111827", "#ffffff"), command=self._load_next_page)
+            self.load_more_btn.pack(pady=20)
+
+    def _load_next_page(self):
+        self.current_offset += self.limit
+        self.load_history(append=True)
 
     def redownload(self, url):
         self.app.show_dashboard()

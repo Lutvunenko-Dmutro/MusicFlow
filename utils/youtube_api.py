@@ -5,10 +5,26 @@ from PIL import Image
 import yt_dlp
 import customtkinter as ctk
 
+_PREVIEW_CACHE = {}
+
 def get_preview_info(url, is_playlist, success_callback, error_callback, image_callback, default_icon_path):
     """
     Отримує інформацію про відео/плейліст та завантажує обкладинку.
     """
+    cache_key = f"{url}_{is_playlist}"
+    if cache_key in _PREVIEW_CACHE:
+        title, artist, cached_img = _PREVIEW_CACHE[cache_key]
+        success_callback(title, artist)
+        if cached_img:
+            photo = ctk.CTkImage(light_image=cached_img, dark_image=cached_img, size=(80, 80))
+            image_callback(photo)
+        else:
+            if os.path.exists(default_icon_path):
+                img = Image.open(default_icon_path)
+                photo = ctk.CTkImage(light_image=img, dark_image=img, size=(50, 50))
+                image_callback(photo)
+        return
+
     try:
         ydl_opts = {'quiet': True, 'no_warnings': True, 'extract_flat': 'in_playlist'}
         if not is_playlist:
@@ -48,10 +64,20 @@ def get_preview_info(url, is_playlist, success_callback, error_callback, image_c
                     image = image.crop((left, top, right, bottom))
                     
                     photo = ctk.CTkImage(light_image=image, dark_image=image, size=(80, 80))
+                    _PREVIEW_CACHE[cache_key] = (title, artist, image)
+                    
+                    # Manage cache size
+                    if len(_PREVIEW_CACHE) > 20:
+                        _PREVIEW_CACHE.pop(next(iter(_PREVIEW_CACHE)))
+                        
                     image_callback(photo)
                     return
             except Exception:
                 pass
+                
+        _PREVIEW_CACHE[cache_key] = (title, artist, None)
+        if len(_PREVIEW_CACHE) > 20:
+            _PREVIEW_CACHE.pop(next(iter(_PREVIEW_CACHE)))
                 
         # Fallback placeholder
         if os.path.exists(default_icon_path):

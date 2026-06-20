@@ -9,6 +9,19 @@
 
 ---
 
+## 📸 Screenshots
+
+### Downloading a Track
+![Downloading](assets/screenshots/download.png)
+
+### Music Player & Real-Time Visualizer
+![Player](assets/screenshots/player.png)
+
+### Your Local Library
+![Library](assets/screenshots/library.png)
+
+---
+
 ## ✨ Key Features
 
 - **🚀 Direct Downloads (Tracks & Playlists)**: Just paste a link to a YouTube video, track, or a full playlist. The app will automatically detect the type and download the highest quality audio using the embedded `yt-dlp` engine.

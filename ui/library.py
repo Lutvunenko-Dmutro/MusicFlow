@@ -19,17 +19,27 @@ class LibraryFrame(ctk.CTkFrame):
 
         self.scroll_frame = ctk.CTkScrollableFrame(self, fg_color="transparent")
         self.scroll_frame.pack(fill="both", expand=True, padx=20, pady=(0, 20))
+        
+        self.current_offset = 0
+        self.limit = 50
 
-    def load_library(self):
-        for widget in self.scroll_frame.winfo_children():
-            widget.destroy()
+    def load_library(self, append=False):
+        if not append:
+            self.current_offset = 0
+            for widget in self.scroll_frame.winfo_children():
+                widget.destroy()
+                
+        # Remove old load_more_btn if exists
+        if hasattr(self, 'load_more_btn') and self.load_more_btn.winfo_exists():
+            self.load_more_btn.destroy()
+
         from core.history_manager import get_history_items
         placeholder_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "icons", "music_placeholder.png")
         
-        items = get_history_items(self.app.output_folder, 1000, placeholder_path)
+        items = get_history_items(self.app.output_folder, limit=self.limit, offset=self.current_offset, default_icon_path=placeholder_path)
         
         from core.i18n import _
-        if not items:
+        if not items and not append:
             ctk.CTkLabel(self.scroll_frame, text=_("lib_empty", "Your library is empty. Download some music first!"), font=ctk.CTkFont(family="Segoe UI", size=16), text_color=("#6B7280", "#9ca3af")).pack(pady=50)
             return
 
@@ -64,6 +74,14 @@ class LibraryFrame(ctk.CTkFrame):
 
             del_btn = ctk.CTkButton(btn_frame, text="🗑", width=35, height=35, corner_radius=8, fg_color=("#D1D5DB", "#2A2A2A"), hover_color=("#FCA5A5", "#5a1818"), text_color="#ef4444", font=ctk.CTkFont(size=16), command=lambda p=item['path'], fn=item['filename']: self.confirm_delete(p, fn))
             del_btn.pack(side="left", padx=5)
+
+        if len(items) == self.limit:
+            self.load_more_btn = ctk.CTkButton(self.scroll_frame, text=_("load_more", "Load More..."), width=200, height=35, corner_radius=8, fg_color=("#E5E7EB", "#2A2A2A"), hover_color=("#D1D5DB", "#3A3A3A"), text_color=("#111827", "#ffffff"), command=self._load_next_page)
+            self.load_more_btn.pack(pady=20)
+
+    def _load_next_page(self):
+        self.current_offset += self.limit
+        self.load_library(append=True)
 
     def confirm_delete(self, path, filename):
         from core.i18n import _

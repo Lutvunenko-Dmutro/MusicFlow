@@ -122,6 +122,10 @@ def download_and_process_music(url, output_folder, is_playlist, fetch_lyrics,
 
 def _build_download_cmd(ytdlp_exe, output_folder, qual, use_sponsorblock, is_playlist, url):
     """Будує список аргументів команди yt-dlp."""
+    import shutil
+    from core.config_manager import load_config
+    config = load_config()
+    
     cmd = [
         ytdlp_exe,
         "--format", "bestaudio/best",
@@ -132,6 +136,10 @@ def _build_download_cmd(ytdlp_exe, output_folder, qual, use_sponsorblock, is_pla
         "--windows-filenames", "--no-warnings", "--newline",
         "-o", os.path.join(output_folder, "%(title)s.%(ext)s"),
     ]
+    
+    if config.get("use_aria2c", False) and shutil.which("aria2c"):
+        cmd.extend(["--downloader", "aria2c", "--downloader-args", "aria2c:-x 4 -s 4 -k 1M"])
+
     if use_sponsorblock:
         cmd.insert(cmd.index("--embed-metadata"), "--sponsorblock-remove")
         cmd.insert(cmd.index("--embed-metadata"), "sponsor,intro,outro,music_offtopic")

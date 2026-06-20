@@ -28,7 +28,10 @@ class AudioVisualizer(tk.Canvas):
         self._lines = []
         self._dots  = []
         self._audio_frames = []
-        self._fps   = 60
+        fps_val = 60
+        if self.app and hasattr(self.app, 'config'):
+            fps_val = int(self.app.config.get("viz_fps", "60"))
+        self._fps = fps_val
         self._is_playing = False
         self._is_loading = False
 

@@ -29,13 +29,13 @@ def _init_db():
     conn.commit()
     return conn
 
-def get_json_history():
-    """Load the full persistent download history from SQLite (keeps function name for compatibility)."""
+def get_json_history(limit=50, offset=0):
+    """Load the full persistent download history from SQLite."""
     conn = None
     try:
         conn = _init_db()
         cursor = conn.cursor()
-        cursor.execute("SELECT title, artist, url, filepath, timestamp FROM history ORDER BY id DESC")
+        cursor.execute("SELECT title, artist, url, filepath, timestamp FROM history ORDER BY id DESC LIMIT ? OFFSET ?", (limit, offset))
         rows = cursor.fetchall()
         
         history = []
@@ -103,7 +103,7 @@ def clear_json_history():
 # Alias for settings.py compatibility
 clear_history_data = clear_json_history
 
-def get_history_items(output_folder, max_items=10, default_icon_path=None):
+def get_history_items(output_folder, limit=50, offset=0, default_icon_path=None):
     """
     Returns a list of history items (dicts) containing metadata and cover image.
     """
@@ -119,7 +119,7 @@ def get_history_items(output_folder, max_items=10, default_icon_path=None):
         if default_icon_path and os.path.exists(default_icon_path):
             default_image = Image.open(default_icon_path)
             
-        for f in files[:max_items]:
+        for f in files[offset : offset + limit]:
             f_path = os.path.join(output_folder, f)
             size_mb = os.path.getsize(f_path) / (1024 * 1024)
             
@@ -174,6 +174,16 @@ def delete_history_files(path):
         finally:
             if conn:
                 conn.close()
+
+        # 1.5 Delete visualizer cache
+        try:
+            from ui.audio_fft import get_cache_path
+            # Default visualizer uses 80 bars
+            cache_file = get_cache_path(path, 80)
+            if os.path.exists(cache_file):
+                os.remove(cache_file)
+        except Exception:
+            pass
 
         # 2. Delete actual files
         if os.path.exists(path):

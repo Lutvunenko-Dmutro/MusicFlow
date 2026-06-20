@@ -49,7 +49,7 @@ class RightColumnFrame(ctk.CTkFrame):
             widget.destroy()
         from core.history_manager import get_history_items
         placeholder_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "icons", "music_placeholder.png")
-        items = get_history_items(self.app.output_folder, 50, placeholder_path)
+        items = get_history_items(self.app.output_folder, limit=50, offset=0, default_icon_path=placeholder_path)
         
         if not items:
             empty_frame = ctk.CTkFrame(self.history_scroll, fg_color="transparent")

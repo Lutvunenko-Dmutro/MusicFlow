@@ -9,7 +9,9 @@ DEFAULT_CONFIG = {
     "theme": "Dark",
     "quality": "320",
     "embed_lyrics": True,
-    "use_sponsorblock": True
+    "use_sponsorblock": True,
+    "viz_fps": "60",
+    "use_aria2c": False
 }
 
 def load_config():
