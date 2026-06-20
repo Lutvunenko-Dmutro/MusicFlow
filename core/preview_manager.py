@@ -16,9 +16,7 @@ class PreviewManager:
 
     def fetch_preview_info(self, url):
         from utils.youtube_api import get_preview_info
-        from core.i18n import _
-        mode_str = self.app.right_column.mode_dropdown.get()
-        is_playlist = (mode_str == _("mode_playlist", "Full Playlist"))
+        is_playlist = "list=" in url
         default_icon = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "icons", "music_placeholder.png")
         
         def on_success(title, artist):

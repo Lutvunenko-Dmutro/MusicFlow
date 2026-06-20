@@ -9,6 +9,12 @@ class ErrorDialog(ctk.CTkToplevel):
         self.attributes("-topmost", True)
         self.log_path = log_path
         
+        try:
+            icon_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "icon.ico")
+            self.after(200, lambda: self.iconbitmap(icon_path))
+        except Exception:
+            pass
+        
         # Center the window
         self.update_idletasks()
         width = self.winfo_width()

@@ -1,5 +1,6 @@
 import customtkinter as ctk
 import re
+import os
 
 class KaraokeLyricsUI:
     def __init__(self, app, lyrics_text, on_regenerate=None):
@@ -8,6 +9,13 @@ class KaraokeLyricsUI:
         self.dialog.title("Караоке (Синхронізований текст)")
         self.dialog.geometry("450x600")
         self.dialog.attributes('-topmost', True)
+        
+        try:
+            icon_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "icon.ico")
+            self.dialog.after(200, lambda: self.dialog.iconbitmap(icon_path))
+        except Exception:
+            pass
+        
         
         self.dialog.update_idletasks()
         x = self.app.winfo_x() + (self.app.winfo_width() - 450) // 2
