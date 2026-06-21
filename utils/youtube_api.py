@@ -36,7 +36,10 @@ def get_preview_info(url, is_playlist, success_callback, error_callback, image_c
             try:
                 info = ydl.extract_info(url, download=False)
             except Exception as e:
-                error_callback("Video Unavailable / Error", "Cannot fetch info for this link")
+                import logging
+                logging.error(f"yt-dlp extract_info failed for URL: {url}\nError details: {str(e)}")
+                error_msg = str(e).split('\n')[0]
+                error_callback("Video Unavailable / Error", f"Details: {error_msg}")
                 return
         
         title = info.get('title', 'Unknown Title')
